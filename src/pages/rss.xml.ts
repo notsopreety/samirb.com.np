@@ -1,5 +1,6 @@
 import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
+import { SITE_DOMAIN, SITE_URL } from "../config/portfolioData";
 
 export async function GET(context: any) {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -8,9 +9,9 @@ export async function GET(context: any) {
   );
 
   return rss({
-    title: "samirb.com.np",
+    title: SITE_DOMAIN,
     description: "A blog about backend development, automation, and tech stacks.",
-    site: context.site || "https://samirb.com.np",
+    site: context.site || SITE_URL,
     items: sortedPosts.map((post) => ({
       link: `/posts/${post.id}`,
       title: post.data.title,

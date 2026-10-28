@@ -2,6 +2,7 @@
 import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+import { SITE_DOMAIN } from "../../config/portfolioData";
 
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -23,7 +24,7 @@ function formatDate(date: Date) {
 }
 ---
 
-<Layout title={`Posts - Page ${page.currentPage} | samirb.com.np`}>
+<Layout title={`Posts - Page ${page.currentPage} | `}>
   <div class="blog-container">
     <div class="breadcrumb" transition:name="posts-breadcrumb">
       <a href="/">Home</a>

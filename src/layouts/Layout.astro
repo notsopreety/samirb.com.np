@@ -1,6 +1,6 @@
 ---
 import { ClientRouter } from 'astro:transitions';
-import { discordId, footerSocials, lightModeAccentColor, darkModeAccentColor, syncDiscordAccentInDark, syncDiscordAccentInLight } from '../config/portfolioData';
+import { discordId, footerSocials, lightModeAccentColor, darkModeAccentColor, syncDiscordAccentInDark, syncDiscordAccentInLight, SITE_DOMAIN, SITE_URL } from '../config/portfolioData';
 import '../styles/global.css';
 
 interface Props {
@@ -18,8 +18,8 @@ const {
 const pathname = Astro.url.pathname;
 const currentPath = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
 
-const canonicalURL = new URL(pathname, Astro.site || 'https://samirb.com.np').href;
-const ogImageURL = new URL(ogImage, Astro.site || 'https://samirb.com.np').href;
+const canonicalURL = new URL(pathname, Astro.site || SITE_URL).href;
+const ogImageURL = new URL(ogImage, Astro.site || SITE_URL).href;
 ---
 
 <!doctype html>
@@ -46,7 +46,7 @@ const ogImageURL = new URL(ogImage, Astro.site || 'https://samirb.com.np').href;
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:image" content={ogImageURL} />
-		<meta property="og:site_name" content="samirb.com.np" />
+		<meta property="og:site_name" content={SITE_DOMAIN} />
 
 		<!-- Twitter -->
 		<meta property="twitter:card" content="summary_large_image" />
@@ -57,7 +57,7 @@ const ogImageURL = new URL(ogImage, Astro.site || 'https://samirb.com.np').href;
 
 		<!-- Sitemap & RSS Autodiscovery -->
 		<link rel="sitemap" href="/sitemap-index.xml" />
-		<link rel="alternate" type="application/rss+xml" title="samirb.com.np RSS Feed" href="/rss.xml" />
+		<link rel="alternate" type="application/rss+xml" title={`${SITE_DOMAIN} RSS Feed`} href="/rss.xml" />
 		
 		<!-- Fonts Preloading -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />

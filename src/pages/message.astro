@@ -1,9 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { web3FormsAccessToken } from "../config/portfolioData";
+import { web3FormsAccessToken, SITE_DOMAIN } from "../config/portfolioData";
 ---
 
-<Layout title="Message | samirb.com.np">
+<Layout title="Message | ">
   <div class="message-container">
     <div class="breadcrumb" transition:name="posts-breadcrumb">
       <a href="/">Home</a>
@@ -28,8 +28,8 @@ import { web3FormsAccessToken } from "../config/portfolioData";
 
         <form id="contact-form" class="contact-form">
           <input type="hidden" name="access_key" value={web3FormsAccessToken} />
-          <input type="hidden" name="from_name" value="samirb.com.np Contact Form" />
-          <input type="hidden" name="subject" value="New Contact Message from samirb.com.np" />
+          <input type="hidden" name="from_name" value=" Contact Form" />
+          <input type="hidden" name="subject" value="New Contact Message from " />
           
           <!-- Honeypot Bot Spam Protection -->
           <input type="checkbox" name="botcheck" class="hidden" style="display: none;" />

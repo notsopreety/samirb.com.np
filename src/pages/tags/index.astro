@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+import { SITE_DOMAIN } from "../../config/portfolioData";
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
 
@@ -36,7 +37,7 @@ const sortedTags = Array.from(tagCounts.entries())
   .sort((a, b) => a.name.localeCompare(b.name));
 ---
 
-<Layout title="Tags | samirb.com.np">
+<Layout title={`Tags | ${SITE_DOMAIN}`}>
   <div class="blog-container">
     <div class="breadcrumb" transition:name="posts-breadcrumb">
       <a href="/">Home</a>

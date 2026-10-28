@@ -1,5 +1,5 @@
 ---
-import { web3FormsAccessToken } from '../config/portfolioData';
+import { web3FormsAccessToken, SITE_URL } from '../config/portfolioData';
 
 interface Props {
   postId: string;
@@ -45,7 +45,7 @@ const { postId } = Astro.props;
 
       <div class="form-group">
         <label for="report-post-url">Post URL *</label>
-        <input type="text" id="report-post-url" name="post_url" readonly value={`https://samirb.com.np/posts/${postId}`} class="disabled-input" />
+        <input type="text" id="report-post-url" name="post_url" readonly value={`${SITE_URL}/posts/${postId}`} class="disabled-input" />
       </div>
 
       <div class="form-group">

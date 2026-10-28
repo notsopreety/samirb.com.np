@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import satori from "satori";
 import sharp from "sharp";
-import { discordId } from "../../../config/portfolioData";
+import { discordId, SITE_DOMAIN } from "../../../config/portfolioData";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -253,7 +253,7 @@ export const GET: APIRoute = async ({ props }) => {
                       color: discordColor,
                       fontSize: "22px",
                     },
-                    children: "https://samirb.com.np",
+                    children: SITE_DOMAIN,
                   },
                 },
               ],

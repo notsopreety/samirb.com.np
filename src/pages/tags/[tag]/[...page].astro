@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import type { GetStaticPathsOptions } from "astro";
 import Layout from "../../../layouts/Layout.astro";
+import { SITE_DOMAIN } from "../../../config/portfolioData";
 
 // Simple slugify function matching index.astro
 function slugify(text: string) {
@@ -63,7 +64,7 @@ function formatDate(date: Date) {
 }
 ---
 
-<Layout title={`Tag: ${tagName} - Page ${page.currentPage} | samirb.com.np`}>
+<Layout title={`Tag: ${tagName} - Page ${page.currentPage} | `}>
   <div class="blog-container">
     <div class="breadcrumb" transition:name="posts-breadcrumb">
       <a href="/">Home</a>

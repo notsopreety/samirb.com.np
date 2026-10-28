@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
+import { SITE_DOMAIN } from "../config/portfolioData";
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
 // Sort by date descending
@@ -30,7 +31,7 @@ function formatDate(date: Date) {
 }
 ---
 
-<Layout title="Archive | samirb.com.np">
+<Layout title="Archive | ">
   <div class="archive-container">
     <div class="breadcrumb" transition:name="posts-breadcrumb">
       <a href="/">Home</a>
