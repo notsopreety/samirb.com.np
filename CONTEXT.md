@@ -22,3 +22,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-10-28] Lanyard: improved profile/badges rendering from dcdn API
 - [2026-10-28] Spotify: improved timestamp sync
 - [2026-10-28] Fix: duplicate elapsedSpan
+- [2026-10-28] Fix: added missing font
