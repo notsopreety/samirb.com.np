@@ -24,3 +24,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-10-28] Fix: duplicate elapsedSpan
 - [2026-10-28] Fix: added missing font
 - [2026-10-28] Posts: added blog content and posts/tags/rss
+- [2026-10-28] A11y: light contrast, reduced motion, sr-only, viewport
