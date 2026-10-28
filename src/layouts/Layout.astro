@@ -262,7 +262,7 @@ const ogImageURL = new URL(ogImage, Astro.site || 'https://samirb.com.np').href;
 
 				if (sync) {
 					const discordId = document.body.getAttribute("data-discord-id") || "931511745284038696";
-					const discordAccent = localStorage.getItem("discord-accent") || (window as any).discordAccentColor;
+					const discordAccent = localStorage.getItem("discord-accent");
 					if (discordAccent) {
 						document.documentElement.style.setProperty("--accent-color", discordAccent);
 					}
