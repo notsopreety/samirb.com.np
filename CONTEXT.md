@@ -28,3 +28,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-10-28] Rollback: removed M3 changes
 - [2026-10-28] Rollback: to responsive timeline
 - [2026-10-28] Rollback: back to responsive timeline
+- [2026-10-28] Rollback: to education matrix
