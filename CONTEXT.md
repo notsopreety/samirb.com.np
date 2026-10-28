@@ -17,3 +17,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-10-28] OpenCode: set title to "Dev Portfolio" and created minimal home page (commits 82116e3, 86cf76f)
 - [2026-10-28] Antigravity: added .temp/ to .gitignore, committed agent rules & skills, verified dev runner
 - [2026-10-28] Setup: copied astrofolio structure (config/content/pages/components/layouts/styles, astro config, deps)
+- [2026-10-28] Rollback: reverted to after setup (before audit/env)
