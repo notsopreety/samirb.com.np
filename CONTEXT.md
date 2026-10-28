@@ -31,3 +31,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-10-28] Rollback: to education matrix
 - [2026-10-28] Refactor: globalize site domain
 - [2026-10-28] SEO: meta tags
+- [2026-10-28] Perf: lazy load badges
