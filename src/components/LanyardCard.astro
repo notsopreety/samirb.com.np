@@ -19,21 +19,24 @@ try {
 
 const user = initialProfileData?.user || {};
 const profile = initialProfileData?.user_profile || {};
-const clan = user?.clan || null;
+const clan = user?.clan || user?.primary_guild || null;
 const badges = initialProfileData?.badges || [];
+const collectibles = initialProfileData?.user_profile?.collectibles || user?.collectibles || [];
+const widgets = initialProfileData?.widgets || [];
+const connectedAccounts = initialProfileData?.connected_accounts || [];
 
 const clanBadgeUrl = clan && clan.badge && clan.identity_guild_id
   ? `https://cdn.discordapp.com/clan-badges/${clan.identity_guild_id}/${clan.badge}.png`
   : null;
 
-const displayNameVal = user.global_name || user.username || "Samir Badaila";
-const usernameVal = user.username ? `@${user.username}` : "@loading";
-const pronounsVal = profile.pronouns || "He/Him/His";
-const bioVal = profile.bio || user.bio || "Not ded yet!!";
+const displayNameVal = user.global_name || user.display_name || user.username || "Samir Badaila";
+const usernameVal = user.username ? `@${user.username}` : (initialProfileData?.legacy_username ? initialProfileData.legacy_username : "@loading");
+const pronounsVal = profile.pronouns || user.pronouns || "";
+const bioVal = profile.bio || user.bio || "";
 const avatarUrl = user.avatar
   ? `https://cdn.discordapp.com/avatars/${USER_ID}/${user.avatar}.webp?size=160`
   : "https://cdn.discordapp.com/embed/avatars/0.png";
-const bannerColor = user.banner_color || null;
+const bannerColor = user.banner_color || profile.accent_color ? (typeof user.banner_color === 'string' ? user.banner_color : (profile.accent_color ? `#${(profile.accent_color >>> 0).toString(16).padStart(6, '0')}` : null)) : null;
 
 const decorUrl = user.avatar_decoration_data
   ? `https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.png?size=160`
@@ -72,7 +75,7 @@ const decorUrl = user.avatar_decoration_data
       <div class="profile-sub-title">
         <span id="profile-username">{usernameVal}</span>
         <span class="dot-separator">•</span>
-        <span id="profile-pronouns">{pronounsVal}</span>
+        {pronounsVal && <><span id="profile-pronouns">{pronounsVal}</span><span class="dot-separator">•</span></>}
 
         <!-- Clan Tag -->
         <span class="clan-badge-wrapper" id="clan-badge-container" title={clan && clan.identity_enabled ? `Clan: ${clan.tag}` : ""} style={clan && clan.identity_enabled ? "display: inline-flex;" : "display: none;"}>
@@ -90,8 +93,8 @@ const decorUrl = user.avatar_decoration_data
       <!-- Discord Badges -->
       <div class="badges-row" id="badges-container">
         {badges.map((badge: any) => {
-          const src = `https://cdn.discordapp.com/badge-icons/${badge.icon}.png`;
-          return <img class="badge-icon" src={src} alt={badge.description} title={badge.description} referrerpolicy="no-referrer" />;
+          const src = badge.icon ? `https://cdn.discordapp.com/badge-icons/${badge.icon}.png` : (badge.asset ? `https://cdn.discordapp.com/assets/collectibles/${badge.asset}.png` : "");
+          return src ? <img class="badge-icon" src={src} alt={badge.description || badge.id || ''} title={badge.description || badge.id || ''} referrerpolicy="no-referrer" /> : null;
         })}
       </div>
     </div>
@@ -835,7 +838,7 @@ const decorUrl = user.avatar_decoration_data
       .then((res) => res.json())
       .then((data) => {
         // Update Clan Tag
-        const clan = data.user?.clan || null;
+        const clan = data.user?.clan || data.user?.primary_guild || null;
         const clanBadgeContainer = document.getElementById("clan-badge-container");
         const clanTag = document.getElementById("clan-tag");
         const clanBadgeIcon = document.getElementById("clan-badge-icon") as HTMLImageElement;
@@ -845,11 +848,9 @@ const decorUrl = user.avatar_decoration_data
             clanBadgeContainer.style.display = "inline-flex";
             clanBadgeContainer.title = `Clan: ${clan.tag}`;
           }
-          if (clanTag) clanTag.textContent = clan.tag;
-          if (clanBadgeIcon && clan.badge) {
-            clanBadgeIcon.src = clan.identity_guild_id && clan.badge
-              ? `https://cdn.discordapp.com/clan-badges/${clan.identity_guild_id}/${clan.badge}.png`
-              : "";
+          if (clanTag) clanTag.textContent = clan.tag || "";
+          if (clanBadgeIcon && clan.badge && clan.identity_guild_id) {
+            clanBadgeIcon.src = `https://cdn.discordapp.com/clan-badges/${clan.identity_guild_id}/${clan.badge}.png`;
             clanBadgeIcon.style.display = "block";
           } else if (clanBadgeIcon) {
             clanBadgeIcon.style.display = "none";
@@ -862,8 +863,11 @@ const decorUrl = user.avatar_decoration_data
         const badgesContainer = document.getElementById("badges-container");
         if (badgesContainer && data.badges) {
           badgesContainer.innerHTML = data.badges.map((badge: any) => {
-            const src = `https://cdn.discordapp.com/badge-icons/${badge.icon}.png`;
-            return `<img class="badge-icon" src="${src}" alt="${badge.description}" title="${badge.description}" referrerpolicy="no-referrer" />`;
+            const src = badge.icon ? `https://cdn.discordapp.com/badge-icons/${badge.icon}.png` : (badge.asset ? `https://cdn.discordapp.com/assets/collectibles/${badge.asset}.png` : "");
+            if (!src) return "";
+            const alt = badge.description || badge.id || '';
+            const title = badge.description || badge.id || '';
+            return `<img class="badge-icon" src="${src}" alt="${alt.replace(/"/g, '&quot;')}" title="${title.replace(/"/g, '&quot;')}" referrerpolicy="no-referrer" />`;
           }).join("");
         }
 
