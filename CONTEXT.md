@@ -18,3 +18,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-10-28] Antigravity: added .temp/ to .gitignore, committed agent rules & skills, verified dev runner
 - [2026-10-28] Setup: copied astrofolio structure (config/content/pages/components/layouts/styles, astro config, deps)
 - [2026-10-28] Rollback: reverted to after setup (before audit/env)
+- [2026-10-28] Fixes: added missing assets, converted http->https shares, removed unused Welcome, cleaned dead ref
