@@ -1,0 +1,101 @@
+---
+import { socialsData } from '../config/portfolioData';
+---
+
+<section class="connect-section">
+  <!-- Outlined Fieldset for Connect Section -->
+  <fieldset class="connect-main-fieldset">
+    <legend class="connect-main-legend">Connect With Me</legend>
+    
+    <div class="connect-grid">
+      {socialsData.map(social => (
+        <a href={social.url} target="_blank" rel="noopener noreferrer" class="connect-badge-item" style={`--hover-color: ${social.color}`}>
+          <svg viewBox="0 0 24 24" style={`color: ${social.color};`}>
+            <path d={social.icon}></path>
+          </svg>
+          <span class="text-label">{social.name}</span>
+        </a>
+      ))}
+    </div>
+  </fieldset>
+</section>
+
+<style>
+  .connect-section {
+    padding: 0.25rem 0;
+  }
+
+  /* Outlined Fieldset Container */
+  .connect-main-fieldset {
+    background: transparent;
+    border: 1.5px solid var(--accent-color);
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin: 0;
+    min-inline-size: 0;
+    box-sizing: border-box;
+  }
+
+  .connect-main-legend {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--accent-color);
+    letter-spacing: 0.08em;
+    font-family: var(--font-minecraft);
+    padding: 0 0.5rem;
+    margin-left: 0.5rem;
+    width: auto;
+    line-height: 1;
+  }
+
+  .connect-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
+  .connect-badge-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: var(--badge-bg);
+    border: 1px solid var(--badge-border);
+    padding: 0.25rem 0.625rem;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .connect-badge-item:hover {
+    background: var(--badge-hover-bg);
+    border-color: var(--hover-color);
+  }
+
+  .connect-badge-item svg {
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+    flex-shrink: 0;
+  }
+
+  .text-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 480px) {
+    .connect-main-fieldset {
+      padding: 0.85rem 1rem 1rem 1rem;
+    }
+    .text-label {
+      font-size: 0.75rem;
+    }
+    .connect-main-legend {
+      font-size: 0.65rem;
+    }
+  }
+</style>

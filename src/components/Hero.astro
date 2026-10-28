@@ -1,0 +1,116 @@
+---
+import { heroData } from '../config/portfolioData';
+---
+
+<section class="hero-section">
+  <div class="hero-content">
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      <span class="status-text">{heroData.statusText}</span>
+    </div>
+    <h1 class="hero-title">
+      {heroData.titlePrefix} <span class="text-gradient" transition:name="user-profile-name">{heroData.name}</span><img src="/emoji.webp" class="hero-animated-emoji" width="40" height="40" alt="animated emoji" />
+    </h1>
+    <p class="hero-subtitle" set:html={heroData.subtitle}></p>
+    <div class="hero-meta-divider"></div>
+    <p class="hero-description">
+      {heroData.description}
+    </p>
+    <p class="hero-tagline">
+      <Fragment set:html={heroData.tagline} />
+      <br />
+      <a href="/about" class="know-more-link">Know more about me &rarr;</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .hero-section {
+    padding: 1.5rem 0;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.6rem;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--accent-color);
+    margin-bottom: 1.25rem;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+  }
+
+  .hero-title {
+    font-size: 2.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-animated-emoji {
+    height: 2.75rem;
+    width: auto;
+    display: inline-block;
+    vertical-align: text-bottom;
+    margin-bottom: 0.75rem;
+    margin-left: 0.5rem;
+    object-fit: contain;
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .hero-meta-divider {
+    height: 1px;
+    background-color: var(--card-border);
+    margin: 1rem 0;
+    width: 100%;
+  }
+
+  .hero-description {
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-tagline {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .know-more-link {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    display: inline-block;
+    transition: opacity 0.2s ease;
+  }
+
+  .know-more-link:hover {
+    opacity: 0.85;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 6px;
+  }
+
+  @media (max-width: 600px) {
+    .hero-title {
+      font-size: 2.25rem;
+    }
+  }
+</style>

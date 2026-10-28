@@ -1,0 +1,1238 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import ReportModal from "../../components/ReportModal.astro";
+import { giscusConfig } from "../../config/portfolioData";
+
+function slugify(text: string) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-');
+}
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+// Prev / Next navigation
+const posts = await getCollection("blog", ({ data }) => !data.draft);
+const sortedPosts = posts.sort(
+  (a, b) => b.data.pubDatetime.valueOf() - a.data.pubDatetime.valueOf()
+);
+const index = sortedPosts.findIndex((p) => p.id === post.id);
+const prevPost = index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null;
+const nextPost = index > 0 ? sortedPosts[index - 1] : null;
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+// Estimate reading time
+const wordsPerMinute = 200;
+const wordCount = post.body?.split(/\s+/).length ?? 0;
+const readingTime = Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+---
+
+<Layout 
+  title={`${post.data.title} | samirb.com.np`}
+  description={post.data.description}
+  ogImage={`/posts/${post.id}/index.png`}
+>
+  <!-- Reading progress bar -->
+  <div class="progress-container" aria-hidden="true">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <article class="post-container">
+    <div class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="separator">&raquo;</span>
+      <a href="/posts">Posts</a>
+      <span class="separator">&raquo;</span>
+      <span>{post.data.title}</span>
+    </div>
+
+    <button class="back-btn" onclick="history.back()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Go back
+    </button>
+
+    <header class="post-header">
+      <h1 class="post-title" transition:name={post.id}>{post.data.title}</h1>
+      <div class="post-meta">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <time datetime={post.data.pubDatetime.toISOString()}>
+          {formatDate(post.data.pubDatetime)}
+        </time>
+        <span class="meta-sep">·</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>{readingTime} min read</span>
+      </div>
+
+      {post.data.ogImage && (
+        <div class="hero-frame-wrapper">
+          <div class="hero-frame-accent"></div>
+          <img
+            src={post.data.ogImage}
+            alt={post.data.title}
+            class="hero-cover-img"
+            loading="eager"
+          />
+        </div>
+      )}
+    </header>
+
+    <div class="post-content markdown-body" id="article">
+      <Content />
+    </div>
+
+    <footer class="post-footer">
+      <div class="tags-row">
+        <div class="tags-container">
+          {post.data.tags && post.data.tags.map((tag) => (
+            <a href={`/tags/${slugify(tag)}/`} class="tag-badge-link">
+              <span class="tag-badge">#{tag}</span>
+            </a>
+          ))}
+        </div>
+        <button id="back-to-top-btn" class="back-to-top-btn">
+          &uarr; Back to top
+        </button>
+      </div>
+
+      <div class="share-section">
+        <span class="share-title">Share this post on:</span>
+        <div class="share-row">
+          <div class="share-buttons">
+            <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.data.title)}%20http://samirb.com.np/posts/${post.id}`} target="_blank" rel="noopener noreferrer" title="Share on WhatsApp">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-whatsapp"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" /><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" /></svg>
+            </a>
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=http://samirb.com.np/posts/${post.id}`} target="_blank" rel="noopener noreferrer" title="Share on Facebook">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-facebook"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3" /></svg>
+            </a>
+            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.data.title)}&url=http://samirb.com.np/posts/${post.id}`} target="_blank" rel="noopener noreferrer" title="Share on X">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4l11.733 16h4.267l-11.733 -16z" /><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" /></svg>
+            </a>
+            <a href={`https://t.me/share/url?url=http://samirb.com.np/posts/${post.id}&text=${encodeURIComponent(post.data.title)}`} target="_blank" rel="noopener noreferrer" title="Share on Telegram">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-telegram"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" /></svg>
+            </a>
+            <a href={`https://pinterest.com/pin/create/button/?url=http://samirb.com.np/posts/${post.id}&description=${encodeURIComponent(post.data.title)}`} target="_blank" rel="noopener noreferrer" title="Share on Pinterest">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-pinterest"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 20l4 -9" /><path d="M10.7 14c.437 1.263 1.43 2 2.55 2c2.071 0 3.75 -1.554 3.75 -4a5 5 0 1 0 -9.7 1.7" /><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /></svg>
+            </a>
+            <a href={`mailto:?subject=${encodeURIComponent(post.data.title)}&body=Check out this post: http://samirb.com.np/posts/${post.id}`} title="Share via Email">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-mail"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10z" /><path d="M3 7l9 6l9 -6" /></svg>
+            </a>
+          </div>
+          
+          <button id="open-report-btn" class="report-btn" title="Report Post">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="report-icon"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+            Report Post
+          </button>
+        </div>
+      </div>
+
+      <div class="giscus-wrapper" style="margin-top: 4rem; border-top: 1px dashed var(--card-border); padding-top: 3rem; margin-bottom: 3rem;">
+        <div 
+          class="giscus-container"
+          data-repo={giscusConfig.repo}
+          data-repo-id={giscusConfig.repoId}
+          data-category={giscusConfig.category}
+          data-category-id={giscusConfig.categoryId}
+          data-mapping={giscusConfig.mapping}
+          data-strict={giscusConfig.strict}
+          data-reactions-enabled={giscusConfig.reactionsEnabled}
+          data-emit-metadata={giscusConfig.emitMetadata}
+          data-input-position={giscusConfig.inputPosition}
+          data-lang={giscusConfig.lang}
+          data-loading={giscusConfig.loading}
+        ></div>
+      </div>
+
+      <div class="prev-next-section">
+        {prevPost && (
+          <a href={`/posts/${prevPost.id}`} class="prev-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block flex-none"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <div>
+              <span class="nav-label">Previous Post</span>
+              <div class="post-link-title">{prevPost.data.title}</div>
+            </div>
+          </a>
+        )}
+        {nextPost && (
+          <a href={`/posts/${nextPost.id}`} class="next-link">
+            <div>
+              <span class="nav-label">Next Post</span>
+              <div class="post-link-title">{nextPost.data.title}</div>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block flex-none"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        )}
+      </div>
+    </footer>
+  </article>
+
+  <ReportModal postId={post.id} />
+</Layout>
+
+<script>
+  // ── Reading progress bar ──────────────────────────────────────
+  function setupProgressBar() {
+    const bar = document.getElementById("reading-progress");
+    if (!bar) return;
+    const update = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = docHeight > 0 ? `${(scrollTop / docHeight) * 100}%` : "0%";
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+  }
+
+  // ── Back to top ───────────────────────────────────────────────
+  function setupBackToTop() {
+    const btn = document.getElementById("back-to-top-btn");
+    if (btn) btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  }
+
+  // ── Heading anchor # links ────────────────────────────────────
+  function setupHeadingAnchors() {
+    const anchors = document.querySelectorAll(".markdown-body .heading-anchor");
+    anchors.forEach((a) => {
+      (a as HTMLElement).style.opacity = "0";
+      const heading = a.parentElement;
+      if (!heading) return;
+      heading.addEventListener("mouseenter", () => (a as HTMLElement).style.opacity = "1");
+      heading.addEventListener("mouseleave", () => (a as HTMLElement).style.opacity = "0");
+    });
+  }
+
+  // ── Copy code buttons ─────────────────────────────────────────
+  function setupCopyButtons() {
+    const pres = document.querySelectorAll(".markdown-body pre");
+    pres.forEach((pre) => {
+      // Avoid adding duplicate buttons
+      if (pre.querySelector(".copy-btn")) return;
+
+      const btn = document.createElement("button");
+      btn.className = "copy-btn";
+      btn.textContent = "Copy";
+      btn.setAttribute("aria-label", "Copy code");
+
+      (pre as HTMLElement).style.position = "relative";
+      pre.appendChild(btn);
+
+      btn.addEventListener("click", async () => {
+        const code = pre.querySelector("code");
+        const text = code?.innerText ?? "";
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.textContent = "Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.textContent = "Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        } catch {
+          btn.textContent = "Failed";
+        }
+      });
+    });
+  }
+
+  // ── Wrap images and videos for custom 3D offset frames ──────────
+  function wrapMediaElements() {
+    const article = document.getElementById("article");
+    if (!article) return;
+
+    // 1. Wrap video elements
+    const videos = article.querySelectorAll("video");
+    videos.forEach((video) => {
+      const parent = video.parentElement;
+      if (parent && parent.classList.contains("media-frame-wrapper")) return;
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "media-frame-wrapper video-frame";
+
+      const accent = document.createElement("div");
+      accent.className = "media-frame-accent";
+
+      parent?.insertBefore(wrapper, video);
+      wrapper.appendChild(accent);
+      wrapper.appendChild(video);
+    });
+
+    // 2. Wrap image elements (excluding the hero cover image)
+    const images = article.querySelectorAll("img");
+    images.forEach((img) => {
+      if (img.classList.contains("hero-cover-img")) return;
+
+      let target = img;
+      if (img.parentElement && img.parentElement.tagName === "A") {
+        target = img.parentElement;
+      }
+
+      const parent = target.parentElement;
+      if (parent && parent.classList.contains("media-frame-wrapper")) return;
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "media-frame-wrapper img-frame";
+
+      const accent = document.createElement("div");
+      accent.className = "media-frame-accent";
+
+      parent?.insertBefore(wrapper, target);
+      wrapper.appendChild(accent);
+      wrapper.appendChild(target);
+
+      // Remove parent paragraph if left empty
+      if (parent && parent.tagName === "P" && parent.childNodes.length === 0) {
+        parent.remove();
+      }
+    });
+  }
+
+  let giscusObserver: MutationObserver | null = null;
+  let giscusIntersectionObserver: IntersectionObserver | null = null;
+
+  function setupGiscus() {
+    const commentsContainer = document.querySelector(".giscus-container");
+    if (!commentsContainer) return;
+
+    commentsContainer.innerHTML = "";
+
+    // Lazy load Giscus when container is in/near viewport
+    if (giscusIntersectionObserver) giscusIntersectionObserver.disconnect();
+    giscusIntersectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          // Disconnect observer once loaded
+          giscusIntersectionObserver?.disconnect();
+          giscusIntersectionObserver = null;
+          
+          loadGiscusScript(commentsContainer);
+        }
+      });
+    }, { rootMargin: "200px" });
+
+    giscusIntersectionObserver.observe(commentsContainer);
+  }
+
+  function loadGiscusScript(commentsContainer: Element) {
+    const theme = document.documentElement.getAttribute("data-theme") || "dark";
+    const giscusTheme = theme === "dark" ? "transparent_dark" : "light";
+
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+
+    const dataset = (commentsContainer as HTMLElement).dataset;
+
+    script.setAttribute("data-repo", dataset.repo || "");
+    script.setAttribute("data-repo-id", dataset.repoId || "");
+    script.setAttribute("data-category", dataset.category || "");
+    script.setAttribute("data-category-id", dataset.categoryId || "");
+    script.setAttribute("data-mapping", dataset.mapping || "pathname");
+    script.setAttribute("data-strict", dataset.strict || "0");
+    script.setAttribute("data-reactions-enabled", dataset.reactionsEnabled || "1");
+    script.setAttribute("data-emit-metadata", dataset.emitMetadata || "0");
+    script.setAttribute("data-input-position", dataset.inputPosition || "bottom");
+    script.setAttribute("data-theme", giscusTheme);
+    script.setAttribute("data-lang", dataset.lang || "en");
+    script.setAttribute("crossorigin", "anonymous");
+    script.async = true;
+
+    commentsContainer.appendChild(script);
+
+    // Watch for live theme toggle updates to keep Giscus in sync
+    if (giscusObserver) giscusObserver.disconnect();
+    giscusObserver = new MutationObserver(() => {
+      const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
+      const targetTheme = currentTheme === "dark" ? "transparent_dark" : "light";
+      const iframe = document.querySelector("iframe.giscus-frame") as HTMLIFrameElement;
+      if (iframe) {
+        iframe.contentWindow?.postMessage(
+          {
+            giscus: {
+              setConfig: {
+                theme: targetTheme,
+              },
+            },
+          },
+          "https://giscus.app"
+        );
+      }
+    });
+
+    giscusObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+  }
+
+  function init() {
+    setupProgressBar();
+    setupBackToTop();
+    setupHeadingAnchors();
+    setupCopyButtons();
+    wrapMediaElements();
+    setupGiscus();
+  }
+
+  init();
+  document.addEventListener("astro:after-swap", init);
+</script>
+
+<style>
+  /* ── Reading progress bar ── */
+  .progress-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    z-index: 999;
+    background: transparent;
+  }
+
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--accent-color);
+    transition: width 0.1s linear;
+  }
+
+  /* ── Layout ── */
+  .post-container {
+    width: 100%;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    margin-bottom: 1.5rem;
+    opacity: 0.8;
+    transition: opacity 0.2s ease, color 0.2s ease;
+  }
+
+  .back-btn:hover {
+    opacity: 1;
+    color: var(--accent-color);
+  }
+
+  .post-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .post-title {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    font-weight: 700;
+    color: var(--accent-color);
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+  }
+
+  .post-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-family: var(--font-mono);
+    margin-bottom: 2rem;
+  }
+
+  .meta-sep {
+    opacity: 0.4;
+  }
+
+  /* ── Hero cover image 3D accent frame ── */
+  .hero-frame-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 12px;
+    padding-right: 12px;
+  }
+
+  .hero-frame-accent {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: calc(100% - 8px);
+    height: calc(100% - 8px);
+    border: 2px solid var(--accent-color);
+    border-radius: 4px;
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 6px,
+        color-mix(in srgb, var(--accent-color) 12%, transparent) 6px,
+        color-mix(in srgb, var(--accent-color) 12%, transparent) 7px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 6px,
+        color-mix(in srgb, var(--accent-color) 8%, transparent) 6px,
+        color-mix(in srgb, var(--accent-color) 8%, transparent) 7px
+      );
+    pointer-events: none;
+  }
+
+  .hero-cover-img {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 420px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    transform: translate(-6px, -6px);
+  }
+
+  /* ═══════════════════════════════════════════
+     MARKDOWN BODY — rich prose styles
+  ═══════════════════════════════════════════ */
+  .markdown-body {
+    color: var(--text-primary);
+    line-height: 1.8;
+    font-size: 1.05rem;
+  }
+
+  /* ── Headings ── */
+  .markdown-body :global(h1),
+  .markdown-body :global(h2),
+  .markdown-body :global(h3),
+  .markdown-body :global(h4),
+  .markdown-body :global(h5),
+  .markdown-body :global(h6) {
+    color: var(--text-primary);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .markdown-body :global(h1) { font-size: 1.9rem; }
+  .markdown-body :global(h2) {
+    font-size: 1.5rem;
+    border-bottom: 1px dashed var(--card-border);
+    padding-bottom: 0.5rem;
+  }
+  .markdown-body :global(h3) { font-size: 1.25rem; font-style: italic; }
+  .markdown-body :global(h4) { font-size: 1.1rem; }
+
+  /* Heading anchor # links (injected by rehype-autolink-headings) */
+  .markdown-body :global(.heading-anchor) {
+    margin-left: 0.5rem;
+    font-weight: 400;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 0.85em;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    user-select: none;
+  }
+
+  .markdown-body :global(h2:hover .heading-anchor),
+  .markdown-body :global(h3:hover .heading-anchor),
+  .markdown-body :global(h4:hover .heading-anchor) {
+    opacity: 1;
+  }
+
+  /* ── Paragraphs ── */
+  .markdown-body :global(p) {
+    margin-bottom: 1.4rem;
+  }
+
+  /* ── Inline code `` ── */
+  .markdown-body :global(:not(pre) > code) {
+    font-family: var(--font-mono);
+    background: color-mix(in srgb, var(--accent-color) 12%, var(--bg-primary));
+    color: var(--accent-color);
+    border: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.88em;
+  }
+
+  /* ── Code blocks ── */
+  .markdown-body :global(pre) {
+    position: relative;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    padding: 1.25rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  /* Shiki dual-theme switching using global selectors */
+  :global(.markdown-body .astro-code),
+  :global(.markdown-body pre.astro-code) {
+    background-color: var(--shiki-light-bg) !important;
+    color: var(--shiki-light) !important;
+  }
+
+  :global(.markdown-body .astro-code span) {
+    color: var(--shiki-light) !important;
+  }
+
+  :global(html.dark .markdown-body .astro-code),
+  :global(html.dark .markdown-body pre.astro-code) {
+    background-color: var(--shiki-dark-bg) !important;
+    color: var(--shiki-dark) !important;
+  }
+
+  :global(html.dark .markdown-body .astro-code span) {
+    color: var(--shiki-dark) !important;
+  }
+
+  /* Copy button inside code blocks */
+  .markdown-body :global(.copy-btn) {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    z-index: 1;
+  }
+
+  .markdown-body :global(.copy-btn:hover) {
+    background: color-mix(in srgb, var(--accent-color) 15%, var(--card-bg));
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+  }
+
+  .markdown-body :global(.copy-btn.copied) {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+  }
+
+  /* ── Blockquotes ── */
+  .markdown-body :global(blockquote) {
+    border-left: 3px solid var(--accent-color);
+    margin: 1.5rem 0;
+    padding: 0.5rem 0 0.5rem 1.25rem;
+    opacity: 0.85;
+    font-style: italic;
+  }
+
+  .markdown-body :global(blockquote p) {
+    margin: 0;
+  }
+
+  /* ── Callout blocks (rehype-callouts): > [!NOTE] etc. ── */
+  .markdown-body :global(.callout) {
+    border-radius: 6px;
+    border: 1px solid var(--card-border);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+  }
+
+  .markdown-body :global(.callout-title) {
+    font-weight: 700;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* ── Tables ── */
+  .markdown-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+    overflow-x: auto;
+    display: block;
+  }
+
+  .markdown-body :global(thead) {
+    background: color-mix(in srgb, var(--accent-color) 10%, var(--card-bg));
+  }
+
+  .markdown-body :global(th) {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-align: left;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--card-border);
+    color: var(--accent-color);
+  }
+
+  .markdown-body :global(td) {
+    padding: 0.55rem 1rem;
+    border: 1px solid var(--card-border);
+    vertical-align: top;
+  }
+
+  .markdown-body :global(tr:nth-child(even) td) {
+    background: color-mix(in srgb, var(--accent-color) 4%, transparent);
+  }
+
+  /* ── Lists ── */
+  .markdown-body :global(ul),
+  .markdown-body :global(ol) {
+    margin-bottom: 1.4rem;
+    padding-left: 1.5rem;
+  }
+
+  .markdown-body :global(li) {
+    margin-bottom: 0.45rem;
+  }
+
+  .markdown-body :global(ul li::marker) {
+    color: var(--accent-color);
+  }
+
+  .markdown-body :global(ol li::marker) {
+    color: var(--accent-color);
+    font-family: var(--font-mono);
+  }
+
+  /* ── Checklists (Task Lists) ── */
+  .markdown-body :global(.contains-task-list) {
+    list-style-type: none !important;
+    padding-left: 0 !important;
+  }
+
+  .markdown-body :global(.task-list-item) {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+    list-style-type: none !important;
+  }
+
+  .markdown-body :global(.task-list-item input[type="checkbox"]) {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.15rem;
+    height: 1.15rem;
+    border: 2px solid var(--text-muted);
+    border-radius: 5px;
+    background: transparent;
+    cursor: default;
+    display: inline-grid;
+    place-content: center;
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .markdown-body :global(.task-list-item input[type="checkbox"]:checked) {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+  }
+
+  .markdown-body :global(.task-list-item input[type="checkbox"]:checked::before) {
+    content: "";
+    width: 0.55rem;
+    height: 0.3rem;
+    border-left: 2.2px solid var(--bg-color);
+    border-bottom: 2.2px solid var(--bg-color);
+    transform: rotate(-45deg) translate(0.5px, -1.2px);
+    display: block;
+  }
+
+  .markdown-body :global(.task-list-item:has(input:checked)) {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    text-decoration-color: rgba(255, 255, 255, 0.15) !important;
+  }
+
+  :global([data-theme="light"]) .markdown-body :global(.task-list-item:has(input:checked)) {
+    text-decoration-color: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* ── Links ── */
+  .markdown-body :global(a:not(.heading-anchor)) {
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 4px;
+    text-decoration-color: color-mix(in srgb, var(--accent-color) 50%, transparent);
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+  }
+
+  .markdown-body :global(a:not(.heading-anchor):hover) {
+    color: var(--accent-color);
+    text-decoration-color: var(--accent-color);
+  }
+
+  /* ── Horizontal rule ── */
+  .markdown-body :global(hr) {
+    border: none;
+    border-top: 1px dashed var(--card-border);
+    margin: 2.5rem 0;
+  }
+
+  /* ── Strong / em ── */
+  .markdown-body :global(strong) {
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .markdown-body :global(em) {
+    font-style: italic;
+    opacity: 0.9;
+  }
+
+  /* ── Table of Contents (generated by remark-toc + remark-collapse) ── */
+  .markdown-body :global(details) {
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 1.5rem 0 2rem 0;
+  }
+
+  .markdown-body :global(details > summary) {
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s ease;
+    padding: 0.2rem 0;
+    list-style: none; /* Hide native caret */
+  }
+
+  .markdown-body :global(details > summary:focus),
+  .markdown-body :global(details > summary:focus-visible),
+  .markdown-body :global(details > summary:active) {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .markdown-body :global(details > summary::-webkit-details-marker) {
+    display: none; /* Hide Safari caret */
+  }
+
+  .markdown-body :global(details > summary:hover) {
+    color: var(--accent-color);
+  }
+
+  .markdown-body :global(details > summary::before) {
+    content: '▶';
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+    display: inline-block;
+  }
+
+  .markdown-body :global(details[open] > summary::before) {
+    transform: rotate(90deg);
+    color: var(--accent-color);
+  }
+
+  .markdown-body :global(details > ul),
+  .markdown-body :global(details > ol) {
+    padding: 0.75rem 0 0.75rem 1.5rem;
+    margin: 0;
+    list-style-type: disc;
+    border-top: none;
+  }
+
+  .markdown-body :global(details li) {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .markdown-body :global(details li::marker) {
+    color: var(--accent-color);
+  }
+
+  .markdown-body :global(details a) {
+    color: var(--text-primary);
+    text-decoration: underline !important;
+    text-decoration-style: dashed !important;
+    text-underline-offset: 4px !important;
+    text-decoration-color: color-mix(in srgb, var(--accent-color) 40%, transparent) !important;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+  }
+
+  .markdown-body :global(details a:hover) {
+    color: var(--accent-color) !important;
+    text-decoration-color: var(--accent-color) !important;
+  }
+
+  /* ── Custom Media Frame Wrappers (injected via JS for perfect uniformity) ── */
+  .markdown-body :global(.media-frame-wrapper) {
+    position: relative;
+    padding-bottom: 12px;
+    padding-right: 12px;
+    margin: 2rem auto 2.5rem auto;
+    max-width: 720px; /* Small responsive size like AstroPaper */
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+  }
+
+  .markdown-body :global(.media-frame-accent) {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: calc(100% - 8px);
+    height: calc(100% - 8px);
+    border: 2px solid var(--accent-color);
+    border-radius: 4px;
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 6px,
+        color-mix(in srgb, var(--accent-color) 12%, transparent) 6px,
+        color-mix(in srgb, var(--accent-color) 12%, transparent) 7px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 6px,
+        color-mix(in srgb, var(--accent-color) 8%, transparent) 6px,
+        color-mix(in srgb, var(--accent-color) 8%, transparent) 7px
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .markdown-body :global(.media-frame-wrapper img),
+  .markdown-body :global(.media-frame-wrapper a),
+  .markdown-body :global(.media-frame-wrapper video) {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 450px;
+    border-radius: 4px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    transform: translate(-6px, -6px);
+    margin: 0 !important;
+  }
+
+  .markdown-body :global(.media-frame-wrapper img) {
+    object-fit: cover;
+  }
+
+  .markdown-body :global(.media-frame-wrapper a img) {
+    box-shadow: none;
+    transform: none;
+    border-radius: 0;
+  }
+
+  .markdown-body :global(.media-frame-wrapper video) {
+    object-fit: contain;
+    background: #000;
+  }
+
+  /* ── Post footer ── */
+  .post-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed var(--card-border);
+  }
+
+  .tags-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag-badge-link {
+    text-decoration: none;
+  }
+
+  .tag-badge {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding: 0 0.25rem;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+  }
+
+  .tag-badge-link:hover .tag-badge {
+    color: var(--accent-color);
+  }
+
+  .back-to-top-btn {
+    background: transparent;
+    border: none;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: color 0.2s ease;
+  }
+
+  .back-to-top-btn:hover { color: var(--accent-color); }
+
+  .share-section {
+    margin-bottom: 2rem;
+  }
+
+  .share-title {
+    display: block;
+    font-family: var(--font-mono);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .share-buttons {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+  }
+
+  .share-buttons a {
+    color: var(--text-primary);
+    opacity: 0.8;
+    padding: 0.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+
+  .share-buttons a:hover {
+    color: var(--accent-color);
+    transform: rotate(6deg) scale(1.1);
+  }
+
+  /* ── Report Modal Styles ── */
+  .share-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .report-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0.4rem 0;
+    transition: color 0.2s ease;
+  }
+
+  .report-btn:hover {
+    color: var(--accent-color);
+    background: transparent;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 4px;
+  }
+
+
+
+  .prev-next-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed var(--card-border);
+    margin-top: 1rem;
+  }
+
+  @media (min-width: 600px) {
+    .prev-next-section {
+      grid-template-columns: 1fr 1fr;
+    }
+    .prev-next-section:has(> a:only-child) {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+  }
+
+  .prev-next-section a:only-child {
+    justify-content: center;
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .prev-link, .next-link {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+
+  @media (min-width: 600px) {
+    .next-link:not(:only-child) {
+      grid-column-start: 2;
+    }
+  }
+
+  .prev-link:hover, .next-link:hover {
+    opacity: 0.85;
+  }
+
+  .prev-link {
+    justify-content: flex-start;
+  }
+
+  .next-link {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .prev-link svg, .next-link svg {
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+  }
+
+  .prev-link:hover svg {
+    transform: translateX(-4px);
+  }
+
+  .next-link:hover svg {
+    transform: translateX(4px);
+  }
+
+  .nav-label {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+    display: block;
+  }
+
+  .post-link-title {
+    color: var(--accent-color);
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .prev-link:hover .post-link-title,
+  .next-link:hover .post-link-title {
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 4px;
+  }
+
+
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .hero-cover-img { max-height: 240px; }
+
+    .next-link {
+      justify-content: flex-start;
+      text-align: left;
+    }
+
+    .tags-row {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      text-align: center;
+    }
+
+    .tags-container {
+      justify-content: center;
+    }
+
+    .back-to-top-btn {
+      justify-content: center;
+      width: 100%;
+    }
+
+    .share-section {
+      text-align: center;
+    }
+
+    .share-row {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .share-buttons {
+      justify-content: center;
+    }
+
+    .report-btn {
+      justify-content: center;
+      width: auto;
+    }
+  }
+</style>
