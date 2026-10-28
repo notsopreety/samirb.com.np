@@ -150,47 +150,22 @@ const rightNodes = educationData
         <fieldset class="about-fieldset">
           <legend class="about-legend">Education Path</legend>
           
-          <div class="edu-tree">
-            <!-- Root node (High School) -->
-            {rootNode && (
-              <div class="tree-root">
-                <div class={`education-card ${rootNode.status}`}>
-                  {rootNode.status === 'ongoing' && (
+          <div class="edu-timeline">
+            {educationData
+              .slice()
+              .sort((a,b) => {
+                const order = { completed: 0, ongoing: 1, upcoming: 2 };
+                return (order[a.status] ?? 99) - (order[b.status] ?? 99);
+              })
+              .map((node) => (
+                <article class={`edu-item ${node.status}`}>
+                  {node.status === 'ongoing' && (
                     <svg class="education-border-svg">
                       <rect class="education-dashed-rect" fill="none" vector-effect="non-scaling-stroke" />
                     </svg>
                   )}
-                  <div class="edu-header">
-                    <span class="edu-badge">{rootNode.label}</span>
-                    <span class="edu-duration">{rootNode.year ? `${rootNode.year} • ` : ""}{rootNode.status}</span>
-                  </div>
-                  <h3 class="edu-title">{rootNode.title}</h3>
-                  {rootNode.subtitle && <p class="edu-faculty">{rootNode.subtitle}</p>}
-                  <p class="edu-desc">{rootNode.desc}</p>
-                </div>
-              </div>
-            )}
-
-            <!-- Connection lines (Pure CSS connectors, perfectly aligned and non-stretching) -->
-            <div class="tree-connectors" aria-hidden="true">
-              <div class="connector-stem"></div>
-              <div class="connector-bar">
-                <div class="connector-branch left-branch-line"></div>
-                <div class="connector-branch right-branch-line"></div>
-              </div>
-            </div>
-
-            <!-- Branch column grid containing left/right nodes -->
-            <div class="tree-branches">
-              <!-- Left Branch (Self-Taught / Specialized) -->
-              <div class="tree-branch-col left-branch">
-                {leftNodes.map((node) => (
-                  <div class={`education-card ${node.status}`}>
-                    {node.status === 'ongoing' && (
-                      <svg class="education-border-svg">
-                        <rect class="education-dashed-rect" fill="none" vector-effect="non-scaling-stroke" />
-                      </svg>
-                    )}
+                  <div class="edu-marker" aria-hidden="true"></div>
+                  <div class="edu-content">
                     <div class="edu-header">
                       <span class="edu-badge">{node.label}</span>
                       <span class="edu-duration">{node.year ? `${node.year} • ` : ""}{node.status}</span>
@@ -199,29 +174,8 @@ const rightNodes = educationData
                     {node.subtitle && <p class="edu-faculty">{node.subtitle}</p>}
                     <p class="edu-desc">{node.desc}</p>
                   </div>
-                ))}
-              </div>
-
-              <!-- Right Branch (Bachelor's / Advanced) -->
-              <div class="tree-branch-col right-branch">
-                {rightNodes.map((node) => (
-                  <div class={`education-card ${node.status}`}>
-                    {node.status === 'ongoing' && (
-                      <svg class="education-border-svg">
-                        <rect class="education-dashed-rect" fill="none" vector-effect="non-scaling-stroke" />
-                      </svg>
-                    )}
-                    <div class="edu-header">
-                      <span class="edu-badge">{node.label}</span>
-                      <span class="edu-duration">{node.year ? `${node.year} • ` : ""}{node.status}</span>
-                    </div>
-                    <h3 class="edu-title">{node.title}</h3>
-                    {node.subtitle && <p class="edu-faculty">{node.subtitle}</p>}
-                    <p class="edu-desc">{node.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+                </article>
+              ))}
           </div>
         </fieldset>
       </section>
@@ -353,97 +307,75 @@ const rightNodes = educationData
     margin: 0 0 1.5rem 0;
   }
 
-  /* Education Cards */
-  /* Education Tree Styles */
-  .edu-tree {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    margin-top: 1rem;
-  }
-
-  .tree-root {
-    width: 100%;
-    max-width: 480px;
-    z-index: 2;
-  }
-
-  .tree-connectors {
-    width: 100%;
-    height: 40px;
+  /* Education Timeline */
+  .edu-timeline {
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 1.25rem;
+    margin-top: 1rem;
+    padding-left: 2rem;
   }
 
-  .connector-stem {
-    width: 2px;
-    height: 20px;
-    background: var(--accent-color);
-  }
-
-  .connector-bar {
-    position: absolute;
-    top: 20px;
-    left: 25%;
-    right: 25%;
-    height: 2px;
-    background: var(--accent-color);
-  }
-
-  .connector-branch {
-    position: absolute;
-    top: 0;
-    width: 2px;
-    height: 20px;
-  }
-
-  .connector-branch.left-branch-line {
-    left: 0;
-    background: var(--accent-color);
-  }
-
-  .connector-branch.right-branch-line {
-    right: 0;
-    border-left: 2px dashed var(--text-muted);
-  }
-
-  .tree-branches {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    width: 100%;
-    align-items: start;
-  }
-
-  .tree-branch-col {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    width: 100%;
-  }
-
-  /* Vertical connector lines between cards in the same column */
-  .tree-branch-col .education-card:not(:last-child)::after {
+  .edu-timeline::before {
     content: '';
     position: absolute;
-    bottom: -1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0.6rem;
+    top: 0.25rem;
+    bottom: 0.25rem;
     width: 2px;
-    height: 1.5rem;
-    z-index: 1;
+    background: var(--card-border);
   }
 
-  .tree-branch-col .education-card.completed:not(:last-child)::after,
-  .tree-branch-col .education-card.ongoing:not(:last-child)::after {
-    background: var(--accent-color);
+  .edu-item {
+    position: relative;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
   }
 
-  .tree-branch-col .education-card.upcoming:not(:last-child)::after {
-    border-left: 2px dashed var(--text-muted);
+  .edu-item.completed {
+    border-color: var(--accent-color);
+  }
+
+  .edu-item.ongoing {
+    border-color: var(--accent-color);
+  }
+
+  .edu-item.upcoming {
+    border-color: var(--text-muted);
+    opacity: 0.9;
+  }
+
+  .edu-marker {
+    position: absolute;
+    left: -1.6rem;
+    top: 1.25rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--bg-color);
+    border: 2px solid var(--accent-color);
+    z-index: 2;
+  }
+
+  .edu-item.completed .edu-marker {
+    border-color: var(--accent-color);
+  }
+
+  .edu-item.ongoing .edu-marker {
+    border-color: var(--accent-color);
+  }
+
+  .edu-item.upcoming .edu-marker {
+    border-color: var(--text-muted);
+  }
+
+  .edu-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
   }
 
   .education-card {
@@ -849,56 +781,21 @@ const rightNodes = educationData
   }
 
   @media (max-width: 768px) {
-    .tree-connectors {
-      display: none;
+    .edu-timeline {
+      padding-left: 1.75rem;
+      gap: 1rem;
     }
 
-    .tree-branches {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
+    .edu-timeline::before {
+      left: 0.5rem;
     }
 
-    .edu-tree {
-      position: relative;
-      align-items: stretch;
-      padding-left: 1.5rem;
-      gap: 1.5rem;
+    .edu-marker {
+      left: -1.4rem;
     }
 
-    .edu-tree::before {
-      content: '';
-      position: absolute;
-      left: 10px;
-      top: 2rem;
-      bottom: 2rem;
-      width: 2px;
-      background: var(--card-border);
-      z-index: 1;
-    }
-
-    .education-card {
-      position: relative;
-    }
-
-    .education-card::before {
-      content: '';
-      position: absolute;
-      left: -20px;
-      top: 2rem;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--bg-color);
-      border: 2px solid var(--accent-color);
-      z-index: 2;
-    }
-
-    .education-card.ongoing::before {
-      border-color: var(--accent-color);
-    }
-
-    .education-card.upcoming::before {
-      border-color: var(--text-muted);
+    .edu-item {
+      padding: 0.9rem 1rem;
     }
 
     .info-list li {
