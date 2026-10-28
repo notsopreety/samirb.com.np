@@ -964,8 +964,9 @@ const decorUrl = user.avatar_decoration_data
     const now = Date.now();
 
     const total = end - start;
+    if (total <= 0) return;
     const current = Math.min(total, Math.max(0, now - start));
-    const pct = (current / total) * 100;
+    const pct = Math.max(0, Math.min(100, (current / total) * 100));
 
     const progressBar = document.getElementById("spotify-progress-bar");
     if (progressBar) {
@@ -976,6 +977,10 @@ const decorUrl = user.avatar_decoration_data
       }
     }
 
+    const elapsedSpan = document.getElementById("spotify-elapsed");
+    if (elapsedSpan) elapsedSpan.textContent = formatTime(current);
+    const timeSpan = document.getElementById("spotify-time");
+    if (timeSpan) timeSpan.textContent = formatTime(current);
     const elapsedSpan = document.getElementById("spotify-elapsed");
     if (elapsedSpan) elapsedSpan.textContent = formatTime(current);
   }
