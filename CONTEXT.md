@@ -2,7 +2,7 @@
 
 - Repo: portfolioo (Astro 7.4.2)
 - Branch: master
-- Last commit: 86cf76f "pages: minimal portfolio home"
+- Last commit: f4828a7 "chore: track pnpm-lock.yaml"
 - Note: Dual-agent setup (OpenCode + Antigravity) running concurrently. Always check git status before editing.
 
 ## Current State
