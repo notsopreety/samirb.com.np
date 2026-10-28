@@ -7,12 +7,14 @@ interface Props {
 	title?: string;
 	description?: string;
 	ogImage?: string;
+	keywords?: string[];
 }
 
 const { 
 	title = "Samir Badaila | Backend Developer",
 	description = "Personal website and blog of Samir Badaila, a backend developer based in Nepal. I build modular APIs, reverse-engineer web protocols, and automate processes.",
-	ogImage = "/og-image.png"
+	ogImage = "/og-image.png",
+	keywords = ["Samir Badaila", "backend developer", "MERN", "Node.js", "API", "Nepal", "portfolio", "blog"]
 } = Astro.props;
 
 const pathname = Astro.url.pathname;
@@ -39,6 +41,10 @@ const ogImageURL = new URL(ogImage, Astro.site || SITE_URL).href;
 		<title>{title}</title>
 		<meta name="title" content={title} />
 		<meta name="description" content={description} />
+		<meta name="keywords" content={keywords.join(", ")} />
+		<meta name="author" content="Samir Badaila" />
+		<meta name="robots" content="index, follow" />
+		<meta name="theme-color" content="#111218" />
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
