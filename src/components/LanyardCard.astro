@@ -94,7 +94,7 @@ const decorUrl = user.avatar_decoration_data
       <div class="badges-row" id="badges-container">
         {badges.map((badge: any) => {
           const src = badge.icon ? `https://cdn.discordapp.com/badge-icons/${badge.icon}.png` : (badge.asset ? `https://cdn.discordapp.com/assets/collectibles/${badge.asset}.png` : "");
-          return src ? <img class="badge-icon" src={src} alt={badge.description || badge.id || ''} title={badge.description || badge.id || ''} referrerpolicy="no-referrer" /> : null;
+          return src ? <img class="badge-icon" src={src} alt={badge.description || badge.id || ''} title={badge.description || badge.id || ''} referrerpolicy="no-referrer" loading="lazy" /> : null;
         })}
       </div>
     </div>
@@ -867,7 +867,7 @@ const decorUrl = user.avatar_decoration_data
             if (!src) return "";
             const alt = badge.description || badge.id || '';
             const title = badge.description || badge.id || '';
-            return `<img class="badge-icon" src="${src}" alt="${alt.replace(/"/g, '&quot;')}" title="${title.replace(/"/g, '&quot;')}" referrerpolicy="no-referrer" />`;
+            return `<img class="badge-icon" src="${src}" alt="${alt.replace(/"/g, '&quot;')}" title="${title.replace(/"/g, '&quot;')}" referrerpolicy="no-referrer" loading="lazy" />`;
           }).join("");
         }
 
