@@ -38,3 +38,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-02] Fix: bust avatar/decor cache
 - [2026-11-02] UI: responsive personal info
 - [2026-11-02] Feat: add spotify page
+- [2026-11-02] Rollback: spotify page
