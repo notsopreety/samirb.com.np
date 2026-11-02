@@ -1,0 +1,140 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { SITE_DOMAIN } from "../config/portfolioData";
+---
+
+<Layout title={`Spotify | ${SITE_DOMAIN}`} description="Spotify listening history, top tracks, artists, and stats.">
+  <main class="spotify-page">
+    <header class="page-header">
+      <h1 class="page-title">Spotify</h1>
+      <p class="page-desc">My Spotify history, top tracks, artists & stats.</p>
+    </header>
+
+    <div class="spotify-grid">
+      <section class="spotify-section">
+        <fieldset class="spotify-fieldset">
+          <legend class="spotify-legend">Now Playing</legend>
+          <div class="spotify-card">
+            <p class="placeholder">No track playing or data unavailable.</p>
+          </div>
+        </fieldset>
+      </section>
+
+      <section class="spotify-section">
+        <fieldset class="spotify-fieldset">
+          <legend class="spotify-legend">Recent Tracks</legend>
+          <div class="spotify-card">
+            <p class="placeholder">Recent listening history coming soon.</p>
+          </div>
+        </fieldset>
+      </section>
+
+      <section class="spotify-section">
+        <fieldset class="spotify-fieldset">
+          <legend class="spotify-legend">Top Tracks</legend>
+          <div class="spotify-card">
+            <p class="placeholder">Top tracks will appear here.</p>
+          </div>
+        </fieldset>
+      </section>
+
+      <section class="spotify-section">
+        <fieldset class="spotify-fieldset">
+          <legend class="spotify-legend">Top Artists</legend>
+          <div class="spotify-card">
+            <p class="placeholder">Top artists will appear here.</p>
+          </div>
+        </fieldset>
+      </section>
+
+      <section class="spotify-section full-width">
+        <fieldset class="spotify-fieldset">
+          <legend class="spotify-legend">Stats</legend>
+          <div class="spotify-card">
+            <p class="placeholder">Listening stats coming soon.</p>
+          </div>
+        </fieldset>
+      </section>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .spotify-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+    font-family: var(--font-minecraft);
+  }
+
+  .page-desc {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .spotify-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .spotify-section.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .spotify-fieldset {
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    background: var(--card-bg);
+  }
+
+  .spotify-legend {
+    color: var(--accent-color);
+    font-family: var(--font-minecraft);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    padding: 0 0.5rem;
+  }
+
+  .spotify-card {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .placeholder {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: center;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .spotify-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .spotify-page {
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    .spotify-fieldset {
+      padding: 1rem;
+    }
+  }
+</style>
