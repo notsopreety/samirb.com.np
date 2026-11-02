@@ -35,3 +35,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-10-28] SEO: use light.zip icons/manifest
 - [2026-10-28] Chore: remove unused icons
 - [2026-10-28] SEO: remove deleted favicons
+- [2026-11-02] Fix: bust avatar/decor cache
