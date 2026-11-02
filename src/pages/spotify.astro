@@ -7,15 +7,15 @@ import { SITE_DOMAIN } from "../config/portfolioData";
   <main class="about-page">
     <header class="about-header">
       <h1 class="about-title" transition:name="posts-title">Spotify</h1>
-      <p class="about-desc" transition:name="posts-desc">My Spotify history, top tracks, artists & stats.</p>
+      <p class="about-desc" transition:name="posts-desc">My Spotify listening history, top tracks, artists & stats.</p>
     </header>
 
     <div class="about-page-container">
       <section class="about-section">
         <fieldset class="about-fieldset">
           <legend class="about-legend">Now Playing</legend>
-          <div class="spotify-card">
-            <p class="placeholder">No track playing or data unavailable.</p>
+          <div class="spotify-block">
+            <p class="spotify-placeholder">No track playing or data unavailable.</p>
           </div>
         </fieldset>
       </section>
@@ -23,8 +23,8 @@ import { SITE_DOMAIN } from "../config/portfolioData";
       <section class="about-section">
         <fieldset class="about-fieldset">
           <legend class="about-legend">Recent Tracks</legend>
-          <div class="spotify-card">
-            <p class="placeholder">Recent listening history coming soon.</p>
+          <div class="spotify-block">
+            <p class="spotify-placeholder">Recent listening history coming soon.</p>
           </div>
         </fieldset>
       </section>
@@ -32,8 +32,8 @@ import { SITE_DOMAIN } from "../config/portfolioData";
       <section class="about-section">
         <fieldset class="about-fieldset">
           <legend class="about-legend">Top Tracks</legend>
-          <div class="spotify-card">
-            <p class="placeholder">Top tracks will appear here.</p>
+          <div class="spotify-block">
+            <p class="spotify-placeholder">Top tracks will appear here.</p>
           </div>
         </fieldset>
       </section>
@@ -41,8 +41,8 @@ import { SITE_DOMAIN } from "../config/portfolioData";
       <section class="about-section">
         <fieldset class="about-fieldset">
           <legend class="about-legend">Top Artists</legend>
-          <div class="spotify-card">
-            <p class="placeholder">Top artists will appear here.</p>
+          <div class="spotify-block">
+            <p class="spotify-placeholder">Top artists will appear here.</p>
           </div>
         </fieldset>
       </section>
@@ -50,8 +50,8 @@ import { SITE_DOMAIN } from "../config/portfolioData";
       <section class="about-section">
         <fieldset class="about-fieldset">
           <legend class="about-legend">Stats</legend>
-          <div class="spotify-card">
-            <p class="placeholder">Listening stats coming soon.</p>
+          <div class="spotify-block">
+            <p class="spotify-placeholder">Listening stats coming soon.</p>
           </div>
         </fieldset>
       </section>
@@ -109,14 +109,14 @@ import { SITE_DOMAIN } from "../config/portfolioData";
     padding: 0 0.5rem;
   }
 
-  .spotify-card {
+  .spotify-block {
     min-height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .placeholder {
+  .spotify-placeholder {
     color: var(--text-muted);
     font-size: 0.9rem;
     text-align: center;
@@ -128,12 +128,47 @@ import { SITE_DOMAIN } from "../config/portfolioData";
       padding: 1.5rem 1rem 3rem;
     }
 
+    .about-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .about-title {
+      font-size: 1.75rem;
+    }
+
+    .about-desc {
+      font-size: 0.9rem;
+    }
+
     .about-fieldset {
       padding: 1rem;
     }
 
     .about-page-container {
       gap: 1rem;
+    }
+
+    .spotify-block {
+      min-height: 100px;
+    }
+
+    .spotify-placeholder {
+      font-size: 0.88rem;
+      padding: 0 0.5rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .about-page {
+      padding: 1.25rem 0.875rem 2.5rem;
+    }
+
+    .about-fieldset {
+      padding: 0.875rem;
+    }
+
+    .about-legend {
+      font-size: 0.85rem;
     }
   }
 </style>
