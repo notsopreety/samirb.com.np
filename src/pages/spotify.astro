@@ -507,7 +507,7 @@ function formatDuration(ms: number) {
 <script>
   function initShowMore() {
     document.querySelectorAll('.show-more').forEach((btn) => {
-      btn.addEventListener('click', () => {
+      btn.onclick = () => {
         const target = btn.getAttribute('data-target');
         if (!target) return;
         const list = document.querySelector(`.track-list[data-list="${target}"], .tags-list[data-list="${target}"]`);
@@ -522,9 +522,9 @@ function formatDuration(ms: number) {
             if (idx >= 5) el.classList.add('hidden');
           });
           btn.innerHTML = '<span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
-          list.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          try { list.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch {}
         }
-      });
+      };
     });
   }
   document.addEventListener('astro:page-load', initShowMore);
