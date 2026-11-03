@@ -47,3 +47,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-03] Feat: build spotify page
 - [2026-11-03] UI: add ranking indicators
 - [2026-11-03] Feat: show more for spotify lists
+- [2026-11-03] UI: minimal show more
