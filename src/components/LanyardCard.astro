@@ -142,7 +142,8 @@ const decorUrl = user.avatar_decoration_data
           <a id="spotify-track-link" href="#" target="_blank" rel="noopener noreferrer" class="spotify-link">Song Title</a>
         </h3>
         <p id="spotify-artists">Artists</p>
-        <div class="spotify-playback">
+        <p id="spotify-last-meta" style="font-size: 0.72rem; color: var(--text-muted); margin: 0.2rem 0 0 0;"></p>
+        <div class="spotify-playback" id="spotify-playback">
           <span id="spotify-elapsed">0:00</span>
           <div class="spotify-bar">
             <div id="spotify-progress-bar" style="width: 0%;"></div>
@@ -958,6 +959,65 @@ const decorUrl = user.avatar_decoration_data
     return `${mins}:${formattedSecs}`;
   }
 
+  function timeAgo(ts: number) {
+    const diff = Date.now() - ts;
+    const sec = Math.floor(diff / 1000);
+    if (sec < 60) return `${sec}s ago`;
+    const min = Math.floor(sec / 60);
+    if (min < 60) return `${min}m ago`;
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return `${hr}h ago`;
+    const d = Math.floor(hr / 24);
+    return `${d}d ago`;
+  }
+
+  async function fetchLastPlayed(card: HTMLElement | null, trackLink: HTMLAnchorElement | null, artists: HTMLElement | null, art: HTMLImageElement | null, meta: HTMLElement | null, dur: HTMLElement | null) {
+    try {
+      const res = await fetch("https://api.samirbadaila.com.np/api/spotify/recent", { cache: "no-store" });
+      if (!res.ok) throw new Error("bad");
+      const json = await res.json();
+      const item = json.data?.[0] || json.items?.[0] || json.recent?.[0] || json;
+      if (!item) {
+        if (card) card.style.display = "none";
+        return;
+      }
+      if (card) card.style.display = "flex";
+      const track = item.track || item;
+      if (trackLink) {
+        trackLink.textContent = track.name || item.name || "Unknown";
+        trackLink.href = track.external_urls?.spotify || track.url || item.url || "#";
+      }
+      if (artists) {
+        const artistNames = (track.artists || item.artists || []).map((a: any) => a.name || a).join(", ");
+        artists.textContent = artistNames || item.artist || "";
+      }
+      if (art) {
+        const img = track.album?.images?.[0]?.url || track.albumArt || item.image || item.album?.images?.[0]?.url || "";
+        if (img) {
+          let artUrl = img;
+          if (artUrl.includes("ab67616d0000b273")) {
+            artUrl = artUrl.replace("ab67616d0000b273", "ab67616d00001e02");
+          }
+          art.src = artUrl;
+        }
+      }
+      if (dur) dur.textContent = formatTime(track.duration_ms || item.duration_ms || 0);
+      if (meta) {
+        const ts = item.played_at || item.timestamp || item.playedAt || item.played_at_ms;
+        if (ts) {
+          const ms = typeof ts === "number" ? ts : new Date(ts).getTime();
+          meta.textContent = `Last played ${timeAgo(ms)}`;
+        } else {
+          meta.textContent = "Last played";
+        }
+      }
+      clearInterval(spotifyTimer);
+      spotifyData = null;
+    } catch {
+      if (card) card.style.display = "none";
+    }
+  }
+
   function tickSpotify() {
     if (!spotifyData) return;
     const start = spotifyData.timestamps.start;
@@ -1161,13 +1221,21 @@ const decorUrl = user.avatar_decoration_data
     const spotifyArtists = document.getElementById("spotify-artists");
     const spotifyArt = document.getElementById("spotify-art") as HTMLImageElement;
     const spotifyDuration = document.getElementById("spotify-duration");
+    const spotifyLastMeta = document.getElementById("spotify-last-meta");
+    const spotifyPlayback = document.getElementById("spotify-playback");
 
     clearInterval(spotifyTimer);
     let isSpotify = false;
     if (data.listening_to_spotify && data.spotify) {
       isSpotify = true;
       spotifyData = data.spotify;
-      if (spotifyCard) spotifyCard.style.display = "flex";
+      if (spotifyCard) {
+        spotifyCard.style.display = "flex";
+        const legend = spotifyCard.querySelector('.card-header-label');
+        if (legend) legend.textContent = "Listening to Spotify";
+      }
+      if (spotifyPlayback) spotifyPlayback.style.display = "flex";
+      if (spotifyLastMeta) spotifyLastMeta.textContent = "";
       
       if (spotifyTrackLink) {
         spotifyTrackLink.textContent = data.spotify.song;
@@ -1191,7 +1259,13 @@ const decorUrl = user.avatar_decoration_data
       tickSpotify();
       spotifyTimer = setInterval(tickSpotify, 1000);
     } else {
-      if (spotifyCard) spotifyCard.style.display = "none";
+      if (spotifyCard) {
+        spotifyCard.style.display = "flex";
+        const legend = spotifyCard.querySelector('.card-header-label');
+        if (legend) legend.textContent = "Last Played";
+      }
+      if (spotifyPlayback) spotifyPlayback.style.display = "none";
+      fetchLastPlayed(spotifyCard, spotifyTrackLink, spotifyArtists, spotifyArt, spotifyLastMeta, spotifyDuration);
     }
 
     // Mascot logic: Show on the first visible card
