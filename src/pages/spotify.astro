@@ -60,6 +60,7 @@ function formatDuration(ms: number) {
     <header class="about-header">
       <h1 class="about-title" transition:name="posts-title">Spotify</h1>
       <p class="about-desc" transition:name="posts-desc">My Spotify listening history, top tracks, artists & stats.</p>
+      <a href="/" class="spotify-home-link">← Back to home</a>
     </header>
 
     <div class="about-page-container">
@@ -234,8 +235,22 @@ function formatDuration(ms: number) {
 
   .about-desc {
     color: var(--text-secondary);
-    margin: 0;
+    margin: 0 0 0.8rem 0;
     font-size: 0.95rem;
+  }
+
+  .spotify-home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .spotify-home-link:hover {
+    text-decoration: underline;
   }
 
   .about-page-container {
