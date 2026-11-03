@@ -512,8 +512,18 @@ function formatDuration(ms: number) {
         if (!target) return;
         const list = document.querySelector(`.track-list[data-list="${target}"], .tags-list[data-list="${target}"]`);
         if (!list) return;
-        list.querySelectorAll('.hidden').forEach((el) => el.classList.remove('hidden'));
-        btn.remove();
+        const hidden = list.querySelectorAll('.hidden');
+        if (hidden.length) {
+          hidden.forEach((el) => el.classList.remove('hidden'));
+          btn.innerHTML = '<span>Show less</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+        } else {
+          list.querySelectorAll('[data-index]').forEach((el) => {
+            const idx = parseInt(el.getAttribute('data-index') || '0');
+            if (idx >= 5) el.classList.add('hidden');
+          });
+          btn.innerHTML = '<span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+          list.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
       });
     });
   }
