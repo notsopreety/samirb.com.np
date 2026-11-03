@@ -131,7 +131,7 @@ const decorUrl = user.avatar_decoration_data
 
   <!-- Spotify Card -->
   <fieldset class="activity-card" id="spotify-card" style="display: none;">
-    <legend class="card-header-label">Listening to Spotify</legend>
+    <legend class="card-header-label"><a href="/spotify" style="color: inherit; text-decoration: none;">Listening to Spotify</a></legend>
     <div class="activity-card-body">
       <div class="vinyl-disc">
         <img id="spotify-art" class="spotify-art-img" src="" alt="Album Art" width="60" height="60" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -155,7 +155,7 @@ const decorUrl = user.avatar_decoration_data
 
   <!-- Last Played Card -->
   <fieldset class="activity-card" id="lastplayed-card" style="display: none;">
-    <legend class="card-header-label">Last Played</legend>
+    <legend class="card-header-label"><a href="/spotify" style="color: inherit; text-decoration: none;">Last Played</a></legend>
     <div class="activity-card-body">
       <div class="vinyl-disc vinyl-disc-static">
         <img id="lastplayed-art" class="spotify-art-img" src="" alt="Album Art" width="60" height="60" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -1257,7 +1257,7 @@ const decorUrl = user.avatar_decoration_data
       if (spotifyCard) {
         spotifyCard.style.display = "flex";
         const legend = spotifyCard.querySelector('.card-header-label');
-        if (legend) legend.textContent = "Listening to Spotify";
+        if (legend) legend.innerHTML = '<a href="/spotify" style="color: inherit; text-decoration: none;">Listening to Spotify</a>';
       }
       if (spotifyPlayback) spotifyPlayback.style.display = "flex";
       
@@ -1286,6 +1286,10 @@ const decorUrl = user.avatar_decoration_data
     } else {
       if (spotifyCard) spotifyCard.style.display = "none";
       clearInterval(spotifyTimer);
+      if (lastPlayedCard) {
+        const legend = lastPlayedCard.querySelector('.card-header-label');
+        if (legend) legend.innerHTML = '<a href="/spotify" style="color: inherit; text-decoration: none;">Last Played</a>';
+      }
       fetchLastPlayedSeparate(lastPlayedCard, lastPlayedTrackLink, lastPlayedArtists, lastPlayedArt, lastPlayedMeta);
     }
 
