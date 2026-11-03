@@ -90,7 +90,7 @@ function formatDuration(ms: number) {
                   );
                 })}
               </div>
-              {recent.length > 5 && <button class="show-more" data-target="recent">Show more</button>}
+              {recent.length > 5 && <button class="show-more" data-target="recent"><span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>}
             </>
           ) : (
             <div class="spotify-block">
@@ -134,7 +134,7 @@ function formatDuration(ms: number) {
                   );
                 })}
               </div>
-              {topTracks.length > 5 && <button class="show-more" data-target="toptracks">Show more</button>}
+              {topTracks.length > 5 && <button class="show-more" data-target="toptracks"><span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>}
             </>
           ) : (
             <div class="spotify-block">
@@ -162,7 +162,7 @@ function formatDuration(ms: number) {
                   );
                 })}
               </div>
-              {topArtists.length > 5 && <button class="show-more" data-target="topartists">Show more</button>}
+              {topArtists.length > 5 && <button class="show-more" data-target="topartists"><span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>}
             </>
           ) : (
             <div class="spotify-block">
@@ -185,7 +185,7 @@ function formatDuration(ms: number) {
                   </div>
                 ))}
               </div>
-              {topGenres.length > 5 && <button class="show-more" data-target="topgenres">Show more</button>}
+              {topGenres.length > 5 && <button class="show-more" data-target="topgenres"><span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>}
             </>
           ) : (
             <div class="spotify-block">
@@ -431,19 +431,20 @@ function formatDuration(ms: number) {
   }
 
   .show-more {
-    margin-top: 0.9rem;
-    width: 100%;
-    padding: 0.6rem 0.9rem;
-    border-radius: 10px;
-    border: 1px solid var(--card-border);
-    background: color-mix(in srgb, var(--accent-color) 4%, transparent);
-    color: var(--text-primary);
-    font-size: 0.9rem;
+    margin-top: 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: transparent;
+    border: none;
+    color: var(--accent-color);
+    font-size: 0.88rem;
     cursor: pointer;
+    padding: 0.3rem 0;
   }
 
   .show-more:hover {
-    background: color-mix(in srgb, var(--accent-color) 8%, transparent);
+    text-decoration: underline;
   }
 
   @media (max-width: 768px) {
