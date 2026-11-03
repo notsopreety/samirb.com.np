@@ -56,7 +56,7 @@ function formatDuration(ms: number) {
 ---
 
 <Layout title={`Spotify | ${SITE_DOMAIN}`} description="Spotify listening history, top tracks, artists, and stats.">
-  <main class="about-page">
+  <div class="about-page-wrapper">
     <div class="breadcrumb" transition:name="posts-breadcrumb">
       <a href="/">Home</a>
       <span class="separator">&raquo;</span>
@@ -216,14 +216,12 @@ function formatDuration(ms: number) {
         </fieldset>
       </section>
     </div>
-  </main>
+  </div>
 </Layout>
 
 <style>
-  .about-page {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 1.5rem 4rem;
+  .about-page-wrapper {
+    width: 100%;
   }
 
   .breadcrumb {
@@ -460,10 +458,6 @@ function formatDuration(ms: number) {
   }
 
   @media (max-width: 768px) {
-    .about-page {
-      padding: 1.5rem 1rem 3rem;
-    }
-
     .about-header {
       margin-bottom: 1.5rem;
     }
@@ -503,10 +497,6 @@ function formatDuration(ms: number) {
   }
 
   @media (max-width: 480px) {
-    .about-page {
-      padding: 1.25rem 0.875rem 2.5rem;
-    }
-
     .about-fieldset {
       padding: 0.875rem;
     }
