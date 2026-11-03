@@ -45,3 +45,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-03] Feat: separate last played card
 - [2026-11-03] UI: no rotation for last played
 - [2026-11-03] Feat: build spotify page
+- [2026-11-03] UI: add ranking indicators
