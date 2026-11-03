@@ -61,3 +61,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-03] UI: add breadcrumb
 - [2026-11-03] UI: adjust breadcrumb spacing
 - [2026-11-03] Fix: revert breadcrumb style
+- [2026-11-03] Fix: reduce gap nav breadcrumb
