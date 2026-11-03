@@ -64,3 +64,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-03] Fix: reduce gap nav breadcrumb
 - [2026-11-03] Fix: match about page content width
 - [2026-11-03] UI: globalize link hover underline
+- [2026-11-03] Fix: breadcrumb match about
