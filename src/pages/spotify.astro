@@ -1,6 +1,58 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { SITE_DOMAIN } from "../config/portfolioData";
+
+let recent: any[] = [];
+let topTracks: any[] = [];
+let topArtists: any[] = [];
+let topGenres: any[] = [];
+
+try {
+  const [rRes, tRes, aRes, gRes] = await Promise.all([
+    fetch("https://api.samirbadaila.com.np/api/spotify/recent", { cache: "no-store" }),
+    fetch("https://api.samirbadaila.com.np/api/spotify/top/tracks", { cache: "no-store" }),
+    fetch("https://api.samirbadaila.com.np/api/spotify/top/artists", { cache: "no-store" }),
+    fetch("https://api.samirbadaila.com.np/api/spotify/top/genres", { cache: "no-store" }),
+  ]);
+  if (rRes.ok) {
+    const j = await rRes.json();
+    recent = j.data?.streams || [];
+  }
+  if (tRes.ok) {
+    const j = await tRes.json();
+    topTracks = j.data?.tracks || [];
+  }
+  if (aRes.ok) {
+    const j = await aRes.json();
+    topArtists = j.data?.artists || [];
+  }
+  if (gRes.ok) {
+    const j = await gRes.json();
+    topGenres = j.data?.genres || [];
+  }
+} catch (e) {
+  // ignore
+}
+
+function timeAgo(ts: string) {
+  const diff = Date.now() - new Date(ts).getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const d = Math.floor(hr / 24);
+  return `${d}d ago`;
+}
+
+function formatDuration(ms: number) {
+  if (!ms) return "";
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${sec.toString().padStart(2, "0")}`;
+}
 ---
 
 <Layout title={`Spotify | ${SITE_DOMAIN}`} description="Spotify listening history, top tracks, artists, and stats.">
@@ -13,46 +65,113 @@ import { SITE_DOMAIN } from "../config/portfolioData";
     <div class="about-page-container">
       <section class="about-section">
         <fieldset class="about-fieldset">
-          <legend class="about-legend">Now Playing</legend>
-          <div class="spotify-block">
-            <p class="spotify-placeholder">No track playing or data unavailable.</p>
-          </div>
-        </fieldset>
-      </section>
-
-      <section class="about-section">
-        <fieldset class="about-fieldset">
           <legend class="about-legend">Recent Tracks</legend>
-          <div class="spotify-block">
-            <p class="spotify-placeholder">Recent listening history coming soon.</p>
-          </div>
+          {recent.length ? (
+            <div class="track-list">
+              {recent.slice(0, 10).map((s: any, i: number) => {
+                const track = s.track || {};
+                const artists = (s.artists || []).map((a: any) => a.name).join(", ");
+                const img = track.image || "";
+                const href = track.spotifyUrl || "#";
+                return (
+                  <a class="track-item" href={href} target="_blank" rel="noopener noreferrer">
+                    <span class="track-num">{i + 1}</span>
+                    <img class="track-art" src={img} alt={track.name} loading="lazy" />
+                    <div class="track-info">
+                      <div class="track-name">{track.name}</div>
+                      <div class="track-artist">{artists}</div>
+                    </div>
+                    <div class="track-meta">
+                      {track.duration && <span>{track.duration}</span>}
+                      {s.playedAt && <span>{timeAgo(s.playedAt)}</span>}
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          ) : (
+            <div class="spotify-block">
+              <p class="spotify-placeholder">No recent tracks.</p>
+            </div>
+          )}
         </fieldset>
       </section>
 
       <section class="about-section">
         <fieldset class="about-fieldset">
           <legend class="about-legend">Top Tracks</legend>
-          <div class="spotify-block">
-            <p class="spotify-placeholder">Top tracks will appear here.</p>
-          </div>
+          {topTracks.length ? (
+            <div class="track-list">
+              {topTracks.slice(0, 20).map((t: any) => {
+                const track = t.track || t;
+                const artists = (t.artists || track.artists || []).map((a: any) => a.name || a).join(", ");
+                const img = track.image || t.image || "";
+                const href = track.spotifyUrl || t.spotifyUrl || "#";
+                return (
+                  <a class="track-item" href={href} target="_blank" rel="noopener noreferrer">
+                    <span class="track-num">{t.position || "-"}</span>
+                    <img class="track-art" src={img} alt={track.name} loading="lazy" />
+                    <div class="track-info">
+                      <div class="track-name">{track.name}</div>
+                      <div class="track-artist">{artists}</div>
+                    </div>
+                    <div class="track-meta">
+                      {track.duration && <span>{track.duration}</span>}
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          ) : (
+            <div class="spotify-block">
+              <p class="spotify-placeholder">No top tracks.</p>
+            </div>
+          )}
         </fieldset>
       </section>
 
       <section class="about-section">
         <fieldset class="about-fieldset">
           <legend class="about-legend">Top Artists</legend>
-          <div class="spotify-block">
-            <p class="spotify-placeholder">Top artists will appear here.</p>
-          </div>
+          {topArtists.length ? (
+            <div class="artist-grid">
+              {topArtists.slice(0, 20).map((a: any) => {
+                const img = a.image || a.artist?.image || "";
+                const href = a.spotifyUrl || a.artist?.spotifyUrl || "#";
+                return (
+                  <a class="artist-item" href={href} target="_blank" rel="noopener noreferrer">
+                    <img class="artist-img" src={img} alt={a.name} loading="lazy" />
+                    <div class="artist-name">{a.name || a.artist?.name}</div>
+                    {a.position && <div class="artist-pos">#{a.position}</div>}
+                  </a>
+                );
+              })}
+            </div>
+          ) : (
+            <div class="spotify-block">
+              <p class="spotify-placeholder">No top artists.</p>
+            </div>
+          )}
         </fieldset>
       </section>
 
       <section class="about-section">
         <fieldset class="about-fieldset">
-          <legend class="about-legend">Stats</legend>
-          <div class="spotify-block">
-            <p class="spotify-placeholder">Listening stats coming soon.</p>
-          </div>
+          <legend class="about-legend">Top Genres</legend>
+          {topGenres.length ? (
+            <div class="genre-grid">
+              {topGenres.map((g: any) => (
+                <div class="genre-item">
+                  <span class="genre-pos">#{g.position}</span>
+                  <span class="genre-name">{g.name || g.genre}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div class="spotify-block">
+              <p class="spotify-placeholder">No top genres.</p>
+            </div>
+          )}
         </fieldset>
       </section>
     </div>
@@ -123,6 +242,141 @@ import { SITE_DOMAIN } from "../config/portfolioData";
     margin: 0;
   }
 
+  .track-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .track-item {
+    display: grid;
+    grid-template-columns: 24px 48px 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.5rem 0.6rem;
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s ease;
+  }
+
+  .track-item:hover {
+    background: color-mix(in srgb, var(--accent-color) 6%, transparent);
+  }
+
+  .track-num {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  .track-art {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--bg-color);
+  }
+
+  .track-info {
+    min-width: 0;
+  }
+
+  .track-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .track-artist {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .track-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  .artist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+
+  .artist-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    padding: 0.75rem;
+    border-radius: 12px;
+    transition: background 0.15s ease;
+  }
+
+  .artist-item:hover {
+    background: color-mix(in srgb, var(--accent-color) 6%, transparent);
+  }
+
+  .artist-img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--bg-color);
+  }
+
+  .artist-name {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .artist-pos {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  .genre-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .genre-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--accent-color) 4%, transparent);
+    border: 1px solid var(--card-border);
+  }
+
+  .genre-pos {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  .genre-name {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    text-transform: capitalize;
+  }
+
   @media (max-width: 768px) {
     .about-page {
       padding: 1.5rem 1rem 3rem;
@@ -148,13 +402,25 @@ import { SITE_DOMAIN } from "../config/portfolioData";
       gap: 1rem;
     }
 
-    .spotify-block {
-      min-height: 100px;
+    .track-item {
+      grid-template-columns: 20px 44px 1fr;
+      gap: 0.6rem;
     }
 
-    .spotify-placeholder {
-      font-size: 0.88rem;
-      padding: 0 0.5rem;
+    .track-meta {
+      grid-column: 1 / -1;
+      flex-direction: row;
+      justify-content: space-between;
+      padding-left: 80px;
+    }
+
+    .artist-grid {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    .artist-img {
+      width: 76px;
+      height: 76px;
     }
   }
 
