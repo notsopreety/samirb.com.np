@@ -41,3 +41,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-02] Rollback: spotify page
 - [2026-11-02] UI: remake spotify page
 - [2026-11-03] Feat: last played spotify
+- [2026-11-03] Fix: parse spotify recent api
