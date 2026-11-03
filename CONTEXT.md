@@ -52,3 +52,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-03] UI: leaderboard style for artists
 - [2026-11-03] Rollback: genre style
 - [2026-11-03] UI: genres like tags
+- [2026-11-03] UI: top artists like top tracks
