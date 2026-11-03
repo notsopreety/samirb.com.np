@@ -57,10 +57,15 @@ function formatDuration(ms: number) {
 
 <Layout title={`Spotify | ${SITE_DOMAIN}`} description="Spotify listening history, top tracks, artists, and stats.">
   <main class="about-page">
+    <div class="breadcrumb" transition:name="posts-breadcrumb">
+      <a href="/">Home</a>
+      <span class="separator">&raquo;</span>
+      <span>Spotify</span>
+    </div>
+
     <header class="about-header">
       <h1 class="about-title" transition:name="posts-title">Spotify</h1>
       <p class="about-desc" transition:name="posts-desc">My Spotify listening history, top tracks, artists & stats.</p>
-      <a href="/" class="spotify-home-link">← Back to home</a>
     </header>
 
     <div class="about-page-container">
@@ -221,6 +226,28 @@ function formatDuration(ms: number) {
     padding: 2rem 1.5rem 4rem;
   }
 
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .breadcrumb a {
+    color: var(--accent-color);
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .separator {
+    color: var(--text-muted);
+  }
+
   .about-header {
     margin-bottom: 2rem;
   }
@@ -235,22 +262,8 @@ function formatDuration(ms: number) {
 
   .about-desc {
     color: var(--text-secondary);
-    margin: 0 0 0.8rem 0;
+    margin: 0;
     font-size: 0.95rem;
-  }
-
-  .spotify-home-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    color: var(--accent-color);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
-
-  .spotify-home-link:hover {
-    text-decoration: underline;
   }
 
   .about-page-container {
