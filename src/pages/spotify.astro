@@ -149,16 +149,30 @@ function formatDuration(ms: number) {
           <legend class="about-legend">Top Artists (Last 4 Weeks)</legend>
           {topArtists.length ? (
             <>
-              <div class="artist-leaderboard" data-list="topartists">
+              <div class="track-list" data-list="topartists">
                 {topArtists.map((a: any, i: number) => {
                   const img = a.image || a.artist?.image || "";
                   const href = a.spotifyUrl || a.artist?.spotifyUrl || "#";
                   const pos = a.position || i + 1;
+                  const ind = a.indicator || "";
+                  const followers = a.followers ? new Intl.NumberFormat().format(a.followers) : "";
                   return (
-                    <a class={`artist-lb-item ${i >= 5 ? "hidden" : ""}`} href={href} target="_blank" rel="noopener noreferrer" data-index={i}>
-                      <span class="artist-lb-pos">{pos}</span>
-                      <img class="artist-lb-img" src={img} alt={a.name} loading="lazy" />
-                      <div class="artist-lb-name">{a.name || a.artist?.name}</div>
+                    <a class={`track-item ${i >= 5 ? "hidden" : ""}`} href={href} target="_blank" rel="noopener noreferrer" data-index={i}>
+                      <div class="track-rank">
+                        <span class="track-num">{pos}</span>
+                        {ind === "UP" && <span class="rank-ind up">▲</span>}
+                        {ind === "DOWN" && <span class="rank-ind down">▼</span>}
+                        {ind === "NEW" && <span class="rank-ind new">NEW</span>}
+                        {(ind === "SAME" || !ind) && <span class="rank-ind same">—</span>}
+                      </div>
+                      <img class="track-art" src={img} alt={a.name} loading="lazy" style="border-radius: 50%;" />
+                      <div class="track-info">
+                        <div class="track-name">{a.name || a.artist?.name}</div>
+                        {followers && <div class="track-artist">{followers} followers</div>}
+                      </div>
+                      <div class="track-meta">
+                        {a.popularity !== undefined && <span>Popularity {a.popularity}</span>}
+                      </div>
                     </a>
                   );
                 })}
@@ -358,49 +372,8 @@ function formatDuration(ms: number) {
     font-size: 0.8rem;
   }
 
-  .artist-leaderboard {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
   .artist-lb-item {
-    display: grid;
-    grid-template-columns: 28px 44px 1fr;
-    gap: 0.7rem;
-    align-items: center;
-    padding: 0.5rem 0.6rem;
-    border-radius: 10px;
-    text-decoration: none;
-    color: inherit;
-    transition: background 0.15s ease;
-  }
-
-  .artist-lb-item:hover {
-    background: color-mix(in srgb, var(--accent-color) 6%, transparent);
-  }
-
-  .artist-lb-pos {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-  }
-
-  .artist-lb-img {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-    background: var(--bg-color);
-  }
-
-  .artist-lb-name {
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: none;
   }
 
   .tags-list {
@@ -495,18 +468,9 @@ function formatDuration(ms: number) {
       padding-left: 92px;
     }
 
-    .artist-lb-item {
-      grid-template-columns: 24px 40px 1fr;
+    .track-item {
+      grid-template-columns: 32px 44px 1fr;
       gap: 0.6rem;
-    }
-
-    .artist-lb-img {
-      width: 40px;
-      height: 40px;
-    }
-
-    .artist-lb-name {
-      font-size: 0.88rem;
     }
   }
 
@@ -531,7 +495,7 @@ function formatDuration(ms: number) {
       btn.addEventListener('click', () => {
         const target = btn.getAttribute('data-target');
         if (!target) return;
-        const list = document.querySelector(`.track-list[data-list="${target}"], .artist-leaderboard[data-list="${target}"], .tags-list[data-list="${target}"]`);
+        const list = document.querySelector(`.track-list[data-list="${target}"], .tags-list[data-list="${target}"]`);
         if (!list) return;
         list.querySelectorAll('.hidden').forEach((el) => el.classList.remove('hidden'));
         btn.remove();
