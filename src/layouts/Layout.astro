@@ -352,5 +352,18 @@ const ogImageURL = new URL(ogImage, Astro.site || SITE_URL).href;
 				window.scrollTo(0, 0);
 			});
 		</script>
+	<style is:global>
+		a {
+			color: var(--accent-color);
+			text-decoration: none;
+			transition: color 0.2s ease;
+		}
+
+		a:hover {
+			color: var(--accent-color);
+			text-decoration: underline dashed;
+			text-underline-offset: 4px;
+		}
+	</style>
 	</body>
 </html>
