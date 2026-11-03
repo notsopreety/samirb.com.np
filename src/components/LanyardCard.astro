@@ -157,7 +157,7 @@ const decorUrl = user.avatar_decoration_data
   <fieldset class="activity-card" id="lastplayed-card" style="display: none;">
     <legend class="card-header-label">Last Played</legend>
     <div class="activity-card-body">
-      <div class="vinyl-disc">
+      <div class="vinyl-disc vinyl-disc-static">
         <img id="lastplayed-art" class="spotify-art-img" src="" alt="Album Art" width="60" height="60" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <div class="vinyl-hole"></div>
       </div>
@@ -562,6 +562,10 @@ const decorUrl = user.avatar_decoration_data
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     background: #111218;
     overflow: hidden;
+  }
+
+  .vinyl-disc-static {
+    animation: none !important;
   }
 
   /* Concentric Groove Ring */
