@@ -59,3 +59,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-03] Feat: toggle show more/less
 - [2026-11-03] Fix: show more toggle
 - [2026-11-03] UI: add breadcrumb
+- [2026-11-03] UI: adjust breadcrumb spacing
