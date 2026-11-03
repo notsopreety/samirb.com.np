@@ -175,14 +175,14 @@ function formatDuration(ms: number) {
 
       <section class="about-section">
         <fieldset class="about-fieldset">
-          <legend class="about-legend">Top Genres</legend>
+          <legend class="about-legend">Top Genres (Last 4 Weeks)</legend>
           {topGenres.length ? (
             <>
-              <div class="genre-grid" data-list="topgenres">
+              <div class="tags-list" data-list="topgenres">
                 {topGenres.map((g: any, i: number) => (
-                  <div class={`genre-item ${i >= 5 ? "hidden" : ""}`} data-index={i}>
-                    <span class="genre-pos">#{g.position}</span>
-                    <span class="genre-name">{g.name || g.genre}</span>
+                  <div class={`tag-item ${i >= 5 ? "hidden" : ""}`} data-index={i}>
+                    <span class="tag-name">{g.name || g.genre}</span>
+                    <span class="tag-count">#{g.position}</span>
                   </div>
                 ))}
               </div>
@@ -403,31 +403,36 @@ function formatDuration(ms: number) {
     text-overflow: ellipsis;
   }
 
-  .genre-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 0.6rem;
-  }
-
-  .genre-item {
+  .tags-list {
     display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.6rem 0.8rem;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--accent-color) 4%, transparent);
-    border: 1px solid var(--card-border);
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
-  .genre-pos {
+  .tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 0.88rem;
+  }
+
+  .tag-item:hover {
+    border-color: var(--accent-color);
+  }
+
+  .tag-name {
+    text-transform: capitalize;
+  }
+
+  .tag-count {
     color: var(--text-muted);
     font-size: 0.8rem;
-  }
-
-  .genre-name {
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    text-transform: capitalize;
   }
 
   .hidden {
@@ -526,7 +531,7 @@ function formatDuration(ms: number) {
       btn.addEventListener('click', () => {
         const target = btn.getAttribute('data-target');
         if (!target) return;
-        const list = document.querySelector(`.track-list[data-list="${target}"], .artist-leaderboard[data-list="${target}"], .genre-grid[data-list="${target}"]`);
+        const list = document.querySelector(`.track-list[data-list="${target}"], .artist-leaderboard[data-list="${target}"], .tags-list[data-list="${target}"]`);
         if (!list) return;
         list.querySelectorAll('.hidden').forEach((el) => el.classList.remove('hidden'));
         btn.remove();
