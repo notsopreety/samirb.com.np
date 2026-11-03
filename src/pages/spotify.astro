@@ -67,28 +67,31 @@ function formatDuration(ms: number) {
         <fieldset class="about-fieldset">
           <legend class="about-legend">Recent Tracks</legend>
           {recent.length ? (
-            <div class="track-list">
-              {recent.slice(0, 10).map((s: any, i: number) => {
-                const track = s.track || {};
-                const artists = (s.artists || []).map((a: any) => a.name).join(", ");
-                const img = track.image || "";
-                const href = track.spotifyUrl || "#";
-                return (
-                  <a class="track-item" href={href} target="_blank" rel="noopener noreferrer">
-                    <span class="track-num">{i + 1}</span>
-                    <img class="track-art" src={img} alt={track.name} loading="lazy" />
-                    <div class="track-info">
-                      <div class="track-name">{track.name}</div>
-                      <div class="track-artist">{artists}</div>
-                    </div>
-                    <div class="track-meta">
-                      {track.duration && <span>{track.duration}</span>}
-                      {s.playedAt && <span>{timeAgo(s.playedAt)}</span>}
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
+            <>
+              <div class="track-list" data-list="recent">
+                {recent.map((s: any, i: number) => {
+                  const track = s.track || {};
+                  const artists = (s.artists || []).map((a: any) => a.name).join(", ");
+                  const img = track.image || "";
+                  const href = track.spotifyUrl || "#";
+                  return (
+                    <a class={`track-item ${i >= 5 ? "hidden" : ""}`} href={href} target="_blank" rel="noopener noreferrer" data-index={i}>
+                      <span class="track-num">{i + 1}</span>
+                      <img class="track-art" src={img} alt={track.name} loading="lazy" />
+                      <div class="track-info">
+                        <div class="track-name">{track.name}</div>
+                        <div class="track-artist">{artists}</div>
+                      </div>
+                      <div class="track-meta">
+                        {track.duration && <span>{track.duration}</span>}
+                        {s.playedAt && <span>{timeAgo(s.playedAt)}</span>}
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+              {recent.length > 5 && <button class="show-more" data-target="recent">Show more</button>}
+            </>
           ) : (
             <div class="spotify-block">
               <p class="spotify-placeholder">No recent tracks.</p>
@@ -101,34 +104,38 @@ function formatDuration(ms: number) {
         <fieldset class="about-fieldset">
           <legend class="about-legend">Top Tracks</legend>
           {topTracks.length ? (
-            <div class="track-list">
-              {topTracks.slice(0, 20).map((t: any) => {
-                const track = t.track || t;
-                const artists = (t.artists || track.artists || []).map((a: any) => a.name || a).join(", ");
-                const img = track.image || t.image || "";
-                const href = track.spotifyUrl || t.spotifyUrl || "#";
-                const ind = t.indicator || "";
-                return (
-                  <a class="track-item" href={href} target="_blank" rel="noopener noreferrer">
-                    <div class="track-rank">
-                      <span class="track-num">{t.position || "-"}</span>
-                      {ind === "UP" && <span class="rank-ind up">▲</span>}
-                      {ind === "DOWN" && <span class="rank-ind down">▼</span>}
-                      {ind === "NEW" && <span class="rank-ind new">NEW</span>}
-                      {(ind === "SAME" || !ind) && <span class="rank-ind same">—</span>}
-                    </div>
-                    <img class="track-art" src={img} alt={track.name} loading="lazy" />
-                    <div class="track-info">
-                      <div class="track-name">{track.name}</div>
-                      <div class="track-artist">{artists}</div>
-                    </div>
-                    <div class="track-meta">
-                      {track.duration && <span>{track.duration}</span>}
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
+            <>
+              <div class="track-list" data-list="toptracks">
+                {topTracks.map((t: any) => {
+                  const track = t.track || t;
+                  const artists = (t.artists || track.artists || []).map((a: any) => a.name || a).join(", ");
+                  const img = track.image || t.image || "";
+                  const href = track.spotifyUrl || t.spotifyUrl || "#";
+                  const ind = t.indicator || "";
+                  const idx = (t.position || 0) - 1;
+                  return (
+                    <a class={`track-item ${idx >= 5 ? "hidden" : ""}`} href={href} target="_blank" rel="noopener noreferrer" data-index={idx}>
+                      <div class="track-rank">
+                        <span class="track-num">{t.position || "-"}</span>
+                        {ind === "UP" && <span class="rank-ind up">▲</span>}
+                        {ind === "DOWN" && <span class="rank-ind down">▼</span>}
+                        {ind === "NEW" && <span class="rank-ind new">NEW</span>}
+                        {(ind === "SAME" || !ind) && <span class="rank-ind same">—</span>}
+                      </div>
+                      <img class="track-art" src={img} alt={track.name} loading="lazy" />
+                      <div class="track-info">
+                        <div class="track-name">{track.name}</div>
+                        <div class="track-artist">{artists}</div>
+                      </div>
+                      <div class="track-meta">
+                        {track.duration && <span>{track.duration}</span>}
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+              {topTracks.length > 5 && <button class="show-more" data-target="toptracks">Show more</button>}
+            </>
           ) : (
             <div class="spotify-block">
               <p class="spotify-placeholder">No top tracks.</p>
@@ -141,19 +148,22 @@ function formatDuration(ms: number) {
         <fieldset class="about-fieldset">
           <legend class="about-legend">Top Artists</legend>
           {topArtists.length ? (
-            <div class="artist-grid">
-              {topArtists.slice(0, 20).map((a: any) => {
-                const img = a.image || a.artist?.image || "";
-                const href = a.spotifyUrl || a.artist?.spotifyUrl || "#";
-                return (
-                  <a class="artist-item" href={href} target="_blank" rel="noopener noreferrer">
-                    <img class="artist-img" src={img} alt={a.name} loading="lazy" />
-                    <div class="artist-name">{a.name || a.artist?.name}</div>
-                    {a.position && <div class="artist-pos">#{a.position}</div>}
-                  </a>
-                );
-              })}
-            </div>
+            <>
+              <div class="artist-grid" data-list="topartists">
+                {topArtists.map((a: any, i: number) => {
+                  const img = a.image || a.artist?.image || "";
+                  const href = a.spotifyUrl || a.artist?.spotifyUrl || "#";
+                  return (
+                    <a class={`artist-item ${i >= 5 ? "hidden" : ""}`} href={href} target="_blank" rel="noopener noreferrer" data-index={i}>
+                      <img class="artist-img" src={img} alt={a.name} loading="lazy" />
+                      <div class="artist-name">{a.name || a.artist?.name}</div>
+                      {a.position && <div class="artist-pos">#{a.position}</div>}
+                    </a>
+                  );
+                })}
+              </div>
+              {topArtists.length > 5 && <button class="show-more" data-target="topartists">Show more</button>}
+            </>
           ) : (
             <div class="spotify-block">
               <p class="spotify-placeholder">No top artists.</p>
@@ -166,14 +176,17 @@ function formatDuration(ms: number) {
         <fieldset class="about-fieldset">
           <legend class="about-legend">Top Genres</legend>
           {topGenres.length ? (
-            <div class="genre-grid">
-              {topGenres.map((g: any) => (
-                <div class="genre-item">
-                  <span class="genre-pos">#{g.position}</span>
-                  <span class="genre-name">{g.name || g.genre}</span>
-                </div>
-              ))}
-            </div>
+            <>
+              <div class="genre-grid" data-list="topgenres">
+                {topGenres.map((g: any, i: number) => (
+                  <div class={`genre-item ${i >= 5 ? "hidden" : ""}`} data-index={i}>
+                    <span class="genre-pos">#{g.position}</span>
+                    <span class="genre-name">{g.name || g.genre}</span>
+                  </div>
+                ))}
+              </div>
+              {topGenres.length > 5 && <button class="show-more" data-target="topgenres">Show more</button>}
+            </>
           ) : (
             <div class="spotify-block">
               <p class="spotify-placeholder">No top genres.</p>
@@ -413,6 +426,26 @@ function formatDuration(ms: number) {
     text-transform: capitalize;
   }
 
+  .hidden {
+    display: none !important;
+  }
+
+  .show-more {
+    margin-top: 0.9rem;
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: color-mix(in srgb, var(--accent-color) 4%, transparent);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  .show-more:hover {
+    background: color-mix(in srgb, var(--accent-color) 8%, transparent);
+  }
+
   @media (max-width: 768px) {
     .about-page {
       padding: 1.5rem 1rem 3rem;
@@ -474,3 +507,21 @@ function formatDuration(ms: number) {
     }
   }
 </style>
+
+<script>
+  function initShowMore() {
+    document.querySelectorAll('.show-more').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-target');
+        if (!target) return;
+        const list = document.querySelector(`.track-list[data-list="${target}"], .artist-grid[data-list="${target}"], .genre-grid[data-list="${target}"]`);
+        if (!list) return;
+        list.querySelectorAll('.hidden').forEach((el) => el.classList.remove('hidden'));
+        btn.remove();
+      });
+    });
+  }
+  document.addEventListener('astro:page-load', initShowMore);
+  initShowMore();
+</script>
+
