@@ -1,7 +1,10 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import { discordId, footerSocials, lightModeAccentColor, darkModeAccentColor, syncDiscordAccentInDark, syncDiscordAccentInLight, SITE_DOMAIN, SITE_URL } from '../config/portfolioData';
+import { injectSpeedInsights } from '@vercel/speed-insights';
 import '../styles/global.css';
+
+injectSpeedInsights();
 
 interface Props {
 	title?: string;
