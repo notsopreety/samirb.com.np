@@ -1,10 +1,8 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import { discordId, footerSocials, lightModeAccentColor, darkModeAccentColor, syncDiscordAccentInDark, syncDiscordAccentInLight, SITE_DOMAIN, SITE_URL } from '../config/portfolioData';
-import { injectSpeedInsights } from '@vercel/speed-insights';
+import SpeedInsights from '@vercel/speed-insights/astro';
 import '../styles/global.css';
-
-injectSpeedInsights();
 
 interface Props {
 	title?: string;
@@ -368,5 +366,6 @@ const ogImageURL = new URL(ogImage, Astro.site || SITE_URL).href;
 			text-underline-offset: 4px;
 		}
 	</style>
+	<SpeedInsights />
 	</body>
 </html>
