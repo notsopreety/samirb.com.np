@@ -69,3 +69,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-08] Fix: spotify static + client fetch
 - [2026-11-08] Build: add vercel adapter
 - [2026-11-08] Fix: lanyard reinit on transitions
+- [2026-11-08] Fix: safer lanyard reinit
