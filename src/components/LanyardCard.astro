@@ -1086,9 +1086,7 @@ const decorUrl = user.avatar_decoration_data
 
   function connectLanyard() {
     fetchProfileDetails();
-    try { if (lanyardWS) { lanyardWS.close(); lanyardWS = null; } } catch {}
     const ws = new WebSocket("wss://api.lanyard.rest/socket");
-    lanyardWS = ws;
     let heartbeatInterval: any;
 
     initialLoadTimeout = setTimeout(() => {
@@ -1111,7 +1109,7 @@ const decorUrl = user.avatar_decoration_data
       if (msg.op === 1) {
         const interval = msg.d.heartbeat_interval;
         heartbeatInterval = setInterval(() => {
-          try { ws.send(JSON.stringify({ op: 3 })); } catch {}
+          ws.send(JSON.stringify({ op: 3 }));
         }, interval);
 
         ws.send(JSON.stringify({
@@ -1138,17 +1136,10 @@ const decorUrl = user.avatar_decoration_data
       clearInterval(heartbeatInterval);
       clearInterval(spotifyTimer);
       clearInterval(activityTimer);
-      if (profilePollInterval) {
-        clearInterval(profilePollInterval);
-        profilePollInterval = null;
-      }
+      clearInterval(profilePollInterval);
+      profilePollInterval = null;
       if (initialLoadTimeout) {
-        setTimeout(() => {
-          // Only reconnect if still on page with card
-          if (document.getElementById("lanyard-sidebar-container")) {
-            connectLanyard();
-          }
-        }, 5000);
+        setTimeout(connectLanyard, 5000);
       }
     };
   }
@@ -1374,17 +1365,6 @@ const decorUrl = user.avatar_decoration_data
     }
   }
 
-  let lanyardWS: WebSocket | null = null;
-
-  function cleanup() {
-    try { if (httpPollInterval) { clearInterval(httpPollInterval); httpPollInterval = null; } } catch {}
-    try { if (profilePollInterval) { clearInterval(profilePollInterval); profilePollInterval = null; } } catch {}
-    try { if (spotifyTimer) { clearInterval(spotifyTimer); spotifyTimer = null; } } catch {}
-    try { if (activityTimer) { clearInterval(activityTimer); activityTimer = null; } } catch {}
-    try { if (initialLoadTimeout) { clearTimeout(initialLoadTimeout); initialLoadTimeout = null; } } catch {}
-    try { if (lanyardWS) { lanyardWS.close(); lanyardWS = null; } } catch {}
-  }
-
   // Defer-load avatar decoration after page load to prevent LCP delay
   function initAvatarDecoration() {
     const decorImg = document.getElementById("avatar-decoration") as HTMLImageElement;
@@ -1397,38 +1377,37 @@ const decorUrl = user.avatar_decoration_data
     }
   }
 
-  function initLanyard() {
-    cleanup();
-    lastProfileFingerprint = "";
-    currentAvatarHash = "";
-    currentDecorAsset = "";
-    spotifyData = null;
-    activityStartTime = 0;
-    
-    // Show the card container immediately client-side
-    const cardContainer = document.getElementById("lanyard-sidebar-container");
-    if (cardContainer) {
-      cardContainer.style.display = "flex";
-    }
-    
-    // Fetch latest profile details
-    fetchProfileDetails();
-    
-    // Connect/reconnect
-    connectLanyard();
-    
-    initAvatarDecoration();
-  }
-
   if (document.readyState === "complete") {
     setTimeout(initAvatarDecoration, 200);
   } else {
-    window.addEventListener("load", () => setTimeout(initAvatarDecoration, 200), { once: true });
+    window.addEventListener("load", () => setTimeout(initAvatarDecoration, 200));
   }
 
-  document.addEventListener("astro:page-load", initLanyard);
-  document.addEventListener("astro:after-swap", initLanyard);
-  
-  // Initial load
-  initLanyard();
+  document.addEventListener("astro:after-swap", initAvatarDecoration);
+
+  // Show the card container immediately client-side to prevent static blank states
+  const cardContainer = document.getElementById("lanyard-sidebar-container");
+  if (cardContainer) {
+    cardContainer.style.display = "flex";
+  }
+
+  // Fetch latest profile details (badges, banner, pronouns) immediately
+  fetchProfileDetails();
+
+  // Only connect if not already connected
+  if (!(window as any).__lanyardConnected) {
+    (window as any).__lanyardConnected = true;
+    connectLanyard();
+  } else {
+    // Re-check status on navigation
+    fetch(`https://api.lanyard.rest/v1/users/${USER_ID}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          updateLiveStatus(json.data);
+        }
+      })
+      .catch(() => {});
+    fetchProfileDetails();
+  }
 </script>
