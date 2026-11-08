@@ -71,3 +71,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-08] Fix: lanyard reinit on transitions
 - [2026-11-08] Fix: safer lanyard reinit
 - [2026-11-08] Fix: guard lanyard updates
+- [2026-11-08] Fix: audit improvements
