@@ -1,8 +1,61 @@
 ---
+export const prerender = false;
+
 import Layout from "../layouts/Layout.astro";
 import { SITE_DOMAIN } from "../config/portfolioData";
----
 
+let recent: any[] = [];
+let topTracks: any[] = [];
+let topArtists: any[] = [];
+let topGenres: any[] = [];
+
+try {
+  const [rRes, tRes, aRes, gRes] = await Promise.all([
+    fetch("https://api.samirbadaila.com.np/api/spotify/recent", { cache: "no-store" }),
+    fetch("https://api.samirbadaila.com.np/api/spotify/top/tracks", { cache: "no-store" }),
+    fetch("https://api.samirbadaila.com.np/api/spotify/top/artists", { cache: "no-store" }),
+    fetch("https://api.samirbadaila.com.np/api/spotify/top/genres", { cache: "no-store" }),
+  ]);
+  if (rRes.ok) {
+    const j = await rRes.json();
+    recent = j.data?.streams || [];
+  }
+  if (tRes.ok) {
+    const j = await tRes.json();
+    topTracks = j.data?.tracks || [];
+  }
+  if (aRes.ok) {
+    const j = await aRes.json();
+    topArtists = j.data?.artists || [];
+  }
+  if (gRes.ok) {
+    const j = await gRes.json();
+    topGenres = j.data?.genres || [];
+  }
+} catch (e) {
+  // ignore
+}
+
+function timeAgo(ts: string) {
+  const diff = Date.now() - new Date(ts).getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const d = Math.floor(hr / 24);
+  return `${d}d ago`;
+}
+
+function formatDuration(ms: number) {
+  if (!ms) return "";
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${sec.toString().padStart(2, "0")}`;
+}
+---
 
 <Layout title={`Spotify | ${SITE_DOMAIN}`} description="Spotify listening history, top tracks, artists, and stats.">
   <div class="about-page-wrapper">
@@ -21,44 +74,147 @@ import { SITE_DOMAIN } from "../config/portfolioData";
       <section class="about-section">
         <fieldset class="about-fieldset">
           <legend class="about-legend">Recent Tracks</legend>
-          <div id="recent-list" class="track-list" data-list="recent"></div>
-          <div id="recent-empty" class="spotify-block">
-            <p class="spotify-placeholder">Loading...</p>
-          </div>
-          <button id="btn-recent" class="show-more" data-target="recent" style="display:none"><span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+          {recent.length ? (
+            <>
+              <div class="track-list" data-list="recent">
+                {recent.map((s: any, i: number) => {
+                  const track = s.track || {};
+                  const artists = (s.artists || []).map((a: any) => a.name).join(", ");
+                  const img = track.image || "";
+                  const href = track.spotifyUrl || "#";
+                  return (
+                    <a class={`track-item ${i >= 5 ? "hidden" : ""}`} href={href} target="_blank" rel="noopener noreferrer" data-index={i}>
+                      <span class="track-num">{i + 1}</span>
+                      <img class="track-art" src={img} alt={track.name} loading="lazy" />
+                      <div class="track-info">
+                        <div class="track-name">{track.name}</div>
+                        <div class="track-artist">{artists}</div>
+                      </div>
+                      <div class="track-meta">
+                        {track.duration && <span>{track.duration}</span>}
+                        {s.playedAt && <span>{timeAgo(s.playedAt)}</span>}
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+              {recent.length > 5 && <button class="show-more" data-target="recent"><span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>}
+            </>
+          ) : (
+            <div class="spotify-block">
+              <p class="spotify-placeholder">No recent tracks.</p>
+            </div>
+          )}
         </fieldset>
       </section>
 
       <section class="about-section">
         <fieldset class="about-fieldset">
           <legend class="about-legend">Top Tracks (Last 4 Weeks)</legend>
-          <div id="toptracks-list" class="track-list" data-list="toptracks"></div>
-          <div id="toptracks-empty" class="spotify-block">
-            <p class="spotify-placeholder">Loading...</p>
-          </div>
-          <button id="btn-toptracks" class="show-more" data-target="toptracks" style="display:none"><span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+          {topTracks.length ? (
+            <>
+              <div class="track-list" data-list="toptracks">
+                {topTracks.map((t: any) => {
+                  const track = t.track || t;
+                  const artists = (t.artists || track.artists || []).map((a: any) => a.name || a).join(", ");
+                  const img = track.image || t.image || "";
+                  const href = track.spotifyUrl || t.spotifyUrl || "#";
+                  const ind = t.indicator || "";
+                  const idx = (t.position || 0) - 1;
+                  return (
+                    <a class={`track-item ${idx >= 5 ? "hidden" : ""}`} href={href} target="_blank" rel="noopener noreferrer" data-index={idx}>
+                      <div class="track-rank">
+                        <span class="track-num">{t.position || "-"}</span>
+                        {ind === "UP" && <span class="rank-ind up">▲</span>}
+                        {ind === "DOWN" && <span class="rank-ind down">▼</span>}
+                        {ind === "NEW" && <span class="rank-ind new">NEW</span>}
+                        {(ind === "SAME" || !ind) && <span class="rank-ind same">—</span>}
+                      </div>
+                      <img class="track-art" src={img} alt={track.name} loading="lazy" />
+                      <div class="track-info">
+                        <div class="track-name">{track.name}</div>
+                        <div class="track-artist">{artists}</div>
+                      </div>
+                      <div class="track-meta">
+                        {track.duration && <span>{track.duration}</span>}
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+              {topTracks.length > 5 && <button class="show-more" data-target="toptracks"><span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>}
+            </>
+          ) : (
+            <div class="spotify-block">
+              <p class="spotify-placeholder">No top tracks.</p>
+            </div>
+          )}
         </fieldset>
       </section>
 
       <section class="about-section">
         <fieldset class="about-fieldset">
           <legend class="about-legend">Top Artists (Last 4 Weeks)</legend>
-          <div id="topartists-list" class="track-list" data-list="topartists"></div>
-          <div id="topartists-empty" class="spotify-block">
-            <p class="spotify-placeholder">Loading...</p>
-          </div>
-          <button id="btn-topartists" class="show-more" data-target="topartists" style="display:none"><span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+          {topArtists.length ? (
+            <>
+              <div class="track-list" data-list="topartists">
+                {topArtists.map((a: any, i: number) => {
+                  const img = a.image || a.artist?.image || "";
+                  const href = a.spotifyUrl || a.artist?.spotifyUrl || "#";
+                  const pos = a.position || i + 1;
+                  const ind = a.indicator || "";
+                  const followers = a.followers ? new Intl.NumberFormat().format(a.followers) : "";
+                  return (
+                    <a class={`track-item ${i >= 5 ? "hidden" : ""}`} href={href} target="_blank" rel="noopener noreferrer" data-index={i}>
+                      <div class="track-rank">
+                        <span class="track-num">{pos}</span>
+                        {ind === "UP" && <span class="rank-ind up">▲</span>}
+                        {ind === "DOWN" && <span class="rank-ind down">▼</span>}
+                        {ind === "NEW" && <span class="rank-ind new">NEW</span>}
+                        {(ind === "SAME" || !ind) && <span class="rank-ind same">—</span>}
+                      </div>
+                      <img class="track-art" src={img} alt={a.name} loading="lazy" style="border-radius: 50%;" />
+                      <div class="track-info">
+                        <div class="track-name">{a.name || a.artist?.name}</div>
+                        {followers && <div class="track-artist">{followers} followers</div>}
+                      </div>
+                      <div class="track-meta">
+                        {a.popularity !== undefined && <span>Popularity {a.popularity}</span>}
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+              {topArtists.length > 5 && <button class="show-more" data-target="topartists"><span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>}
+            </>
+          ) : (
+            <div class="spotify-block">
+              <p class="spotify-placeholder">No top artists.</p>
+            </div>
+          )}
         </fieldset>
       </section>
 
       <section class="about-section">
         <fieldset class="about-fieldset">
           <legend class="about-legend">Top Genres (Last 4 Weeks)</legend>
-          <div id="topgenres-list" class="tags-list" data-list="topgenres"></div>
-          <div id="topgenres-empty" class="spotify-block">
-            <p class="spotify-placeholder">Loading...</p>
-          </div>
-          <button id="btn-topgenres" class="show-more" data-target="topgenres" style="display:none"><span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+          {topGenres.length ? (
+            <>
+              <div class="tags-list" data-list="topgenres">
+                {topGenres.map((g: any, i: number) => (
+                  <div class={`tag-item ${i >= 5 ? "hidden" : ""}`} data-index={i}>
+                    <span class="tag-name">{g.name || g.genre}</span>
+                    <span class="tag-count">#{g.position}</span>
+                  </div>
+                ))}
+              </div>
+              {topGenres.length > 5 && <button class="show-more" data-target="topgenres"><span>Show more</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>}
+            </>
+          ) : (
+            <div class="spotify-block">
+              <p class="spotify-placeholder">No top genres.</p>
+            </div>
+          )}
         </fieldset>
       </section>
     </div>
@@ -332,26 +488,6 @@ import { SITE_DOMAIN } from "../config/portfolioData";
 </style>
 
 <script>
-  function timeAgo(ts: string) {
-    const diff = Date.now() - new Date(ts).getTime();
-    const sec = Math.floor(diff / 1000);
-    if (sec < 60) return `${sec}s ago`;
-    const min = Math.floor(sec / 60);
-    if (min < 60) return `${min}m ago`;
-    const hr = Math.floor(min / 60);
-    if (hr < 24) return `${hr}h ago`;
-    const d = Math.floor(hr / 24);
-    return `${d}d ago`;
-  }
-
-  function formatDuration(ms: number) {
-    if (!ms) return "";
-    const s = Math.floor(ms / 1000);
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${sec.toString().padStart(2, "0")}`;
-  }
-
   function initShowMore() {
     document.querySelectorAll('.show-more').forEach((btn) => {
       btn.onclick = () => {
@@ -374,146 +510,7 @@ import { SITE_DOMAIN } from "../config/portfolioData";
       };
     });
   }
-
-  async function loadSpotify() {
-    try {
-      const [rRes, tRes, aRes, gRes] = await Promise.all([
-        fetch("https://api.samirbadaila.com.np/api/spotify/recent", { cache: "no-store" }),
-        fetch("https://api.samirbadaila.com.np/api/spotify/top/tracks", { cache: "no-store" }),
-        fetch("https://api.samirbadaila.com.np/api/spotify/top/artists", { cache: "no-store" }),
-        fetch("https://api.samirbadaila.com.np/api/spotify/top/genres", { cache: "no-store" }),
-      ]);
-
-      const recent = rRes.ok ? (await rRes.json()).data?.streams || [] : [];
-      const topTracks = tRes.ok ? (await tRes.json()).data?.tracks || [] : [];
-      const topArtists = aRes.ok ? (await aRes.json()).data?.artists || [] : [];
-      const topGenres = gRes.ok ? (await gRes.json()).data?.genres || [] : [];
-
-      const recentList = document.getElementById('recent-list');
-      const recentEmpty = document.getElementById('recent-empty');
-      const btnRecent = document.getElementById('btn-recent');
-      if (recentList && recentEmpty) {
-        if (recent.length) {
-          recentEmpty.style.display = 'none';
-          recentList.innerHTML = '';
-          recent.forEach((s: any, i: number) => {
-            const track = s.track || {};
-            const artists = (s.artists || []).map((a: any) => a.name).join(", ");
-            const img = track.image || "";
-            const href = track.spotifyUrl || "#";
-            const a = document.createElement('a');
-            a.className = `track-item ${i >= 5 ? "hidden" : ""}`;
-            a.href = href;
-            a.target = "_blank";
-            a.rel = "noopener noreferrer";
-            a.setAttribute('data-index', String(i));
-            a.innerHTML = `<span class="track-num">${i + 1}</span><img class="track-art" src="${img}" alt="${(track.name||'').replace(/"/g,'&quot;')}" loading="lazy" /><div class="track-info"><div class="track-name">${track.name||''}</div><div class="track-artist">${artists}</div></div><div class="track-meta">${track.duration ? `<span>${track.duration}</span>` : ''}${s.playedAt ? `<span>${timeAgo(s.playedAt)}</span>` : ''}</div>`;
-            recentList.appendChild(a);
-          });
-          if (recent.length > 5 && btnRecent) {
-            btnRecent.style.display = 'flex';
-          }
-        } else {
-          recentEmpty.querySelector('.spotify-placeholder').textContent = 'No recent tracks.';
-        }
-      }
-
-      const ttList = document.getElementById('toptracks-list');
-      const ttEmpty = document.getElementById('toptracks-empty');
-      const btnTT = document.getElementById('btn-toptracks');
-      if (ttList && ttEmpty) {
-        if (topTracks.length) {
-          ttEmpty.style.display = 'none';
-          ttList.innerHTML = '';
-          topTracks.forEach((t: any) => {
-            const track = t.track || t;
-            const artists = (t.artists || track.artists || []).map((a: any) => a.name || a).join(", ");
-            const img = track.image || t.image || "";
-            const href = track.spotifyUrl || t.spotifyUrl || "#";
-            const ind = t.indicator || "";
-            const idx = (t.position || 0) - 1;
-            const a = document.createElement('a');
-            a.className = `track-item ${idx >= 5 ? "hidden" : ""}`;
-            a.href = href;
-            a.target = "_blank";
-            a.rel = "noopener noreferrer";
-            a.setAttribute('data-index', String(idx));
-            let indHtml = '';
-            if (ind === "UP") indHtml = '<span class="rank-ind up">▲</span>';
-            else if (ind === "DOWN") indHtml = '<span class="rank-ind down">▼</span>';
-            else if (ind === "NEW") indHtml = '<span class="rank-ind new">NEW</span>';
-            else indHtml = '<span class="rank-ind same">—</span>';
-            a.innerHTML = `<div class="track-rank"><span class="track-num">${t.position||'-'}</span>${indHtml}</div><img class="track-art" src="${img}" alt="${(track.name||'').replace(/"/g,'&quot;')}" loading="lazy" /><div class="track-info"><div class="track-name">${track.name||''}</div><div class="track-artist">${artists}</div></div><div class="track-meta">${track.duration ? `<span>${track.duration}</span>` : ''}</div>`;
-            ttList.appendChild(a);
-          });
-          if (topTracks.length > 5 && btnTT) btnTT.style.display = 'flex';
-        } else {
-          ttEmpty.querySelector('.spotify-placeholder').textContent = 'No top tracks.';
-        }
-      }
-
-      const taList = document.getElementById('topartists-list');
-      const taEmpty = document.getElementById('topartists-empty');
-      const btnTA = document.getElementById('btn-topartists');
-      if (taList && taEmpty) {
-        if (topArtists.length) {
-          taEmpty.style.display = 'none';
-          taList.innerHTML = '';
-          topArtists.forEach((a: any, i: number) => {
-            const img = a.image || a.artist?.image || "";
-            const href = a.spotifyUrl || a.artist?.spotifyUrl || "#";
-            const pos = a.position || i + 1;
-            const ind = a.indicator || "";
-            const followers = a.followers ? new Intl.NumberFormat().format(a.followers) : "";
-            const link = document.createElement('a');
-            link.className = `track-item ${i >= 5 ? "hidden" : ""}`;
-            link.href = href;
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            link.setAttribute('data-index', String(i));
-            let indHtml = '';
-            if (ind === "UP") indHtml = '<span class="rank-ind up">▲</span>';
-            else if (ind === "DOWN") indHtml = '<span class="rank-ind down">▼</span>';
-            else if (ind === "NEW") indHtml = '<span class="rank-ind new">NEW</span>';
-            else indHtml = '<span class="rank-ind same">—</span>';
-            link.innerHTML = `<div class="track-rank"><span class="track-num">${pos}</span>${indHtml}</div><img class="track-art" src="${img}" alt="${(a.name||a.artist?.name||'').replace(/"/g,'&quot;')}" loading="lazy" style="border-radius: 50%;" /><div class="track-info"><div class="track-name">${a.name||a.artist?.name||''}</div>${followers ? `<div class="track-artist">${followers} followers</div>` : ''}</div><div class="track-meta">${a.popularity !== undefined ? `<span>Popularity ${a.popularity}</span>` : ''}</div>`;
-            taList.appendChild(link);
-          });
-          if (topArtists.length > 5 && btnTA) btnTA.style.display = 'flex';
-        } else {
-          taEmpty.querySelector('.spotify-placeholder').textContent = 'No top artists.';
-        }
-      }
-
-      const tgList = document.getElementById('topgenres-list');
-      const tgEmpty = document.getElementById('topgenres-empty');
-      const btnTG = document.getElementById('btn-topgenres');
-      if (tgList && tgEmpty) {
-        if (topGenres.length) {
-          tgEmpty.style.display = 'none';
-          tgList.innerHTML = '';
-          topGenres.forEach((g: any, i: number) => {
-            const div = document.createElement('div');
-            div.className = `tag-item ${i >= 5 ? "hidden" : ""}`;
-            div.setAttribute('data-index', String(i));
-            div.innerHTML = `<span class="tag-name">${g.name||g.genre||''}</span><span class="tag-count">#${g.position||i+1}</span>`;
-            tgList.appendChild(div);
-          });
-          if (topGenres.length > 5 && btnTG) btnTG.style.display = 'flex';
-        } else {
-          tgEmpty.querySelector('.spotify-placeholder').textContent = 'No top genres.';
-        }
-      }
-
-      initShowMore();
-    } catch (e) {
-      const placeholders = document.querySelectorAll('.spotify-placeholder');
-      placeholders.forEach((p) => { if (p.textContent === 'Loading...') p.textContent = 'Failed to load.'; });
-    }
-  }
-
-  document.addEventListener('astro:page-load', () => { initShowMore(); loadSpotify(); });
+  document.addEventListener('astro:page-load', initShowMore);
   initShowMore();
-  loadSpotify();
 </script>
 
