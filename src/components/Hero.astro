@@ -9,7 +9,7 @@ import { heroData } from '../config/portfolioData';
       <span class="status-text">{heroData.statusText}</span>
     </div>
     <h1 class="hero-title">
-      {heroData.titlePrefix} <span class="text-gradient" transition:name="user-profile-name">{heroData.name}</span><img src="/emoji.webp" class="hero-animated-emoji" width="40" height="40" alt="animated emoji" />
+      {heroData.titlePrefix} <span class="text-gradient" transition:name="user-profile-name">{heroData.name}</span><span class="hero-animated-emoji" aria-hidden="true"></span>
     </h1>
     <p class="hero-subtitle" set:html={heroData.subtitle}></p>
     <div class="hero-meta-divider"></div>
@@ -60,12 +60,15 @@ import { heroData } from '../config/portfolioData';
 
   .hero-animated-emoji {
     height: 2.75rem;
-    width: auto;
+    width: 2.75rem;
     display: inline-block;
     vertical-align: text-bottom;
     margin-bottom: 0.75rem;
     margin-left: 0.5rem;
-    object-fit: contain;
+    background-image: url('/emoji.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
   }
 
   .hero-subtitle {
