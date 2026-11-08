@@ -16,7 +16,7 @@ interface Props {
 const { 
 	title = "Samir Badaila | Backend Developer",
 	description = "Personal website and blog of Samir Badaila, a backend developer based in Nepal. I build modular APIs, reverse-engineer web protocols, and automate processes.",
-	ogImage = "/og-image.png",
+	ogImage = "/android-chrome-512x512.png",
 	keywords = ["Samir Badaila", "backend developer", "MERN", "Node.js", "API", "Nepal", "portfolio", "blog"]
 } = Astro.props;
 
@@ -49,7 +49,7 @@ const ogImageURL = new URL(ogImage, Astro.site || SITE_URL).href;
 		<meta name="keywords" content={keywords.join(", ")} />
 		<meta name="author" content="Samir Badaila" />
 		<meta name="robots" content="index, follow" />
-		<meta name="theme-color" content="#111218" />
+		<meta name="theme-color" content="#111218" id="theme-color-meta" />
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
@@ -141,6 +141,7 @@ const ogImageURL = new URL(ogImage, Astro.site || SITE_URL).href;
 		</script>
 	</head>
 	<body data-discord-id={discordId} data-light-accent={lightModeAccentColor} data-dark-accent={darkModeAccentColor} data-sync-dark={syncDiscordAccentInDark ? "true" : "false"} data-sync-light={syncDiscordAccentInLight ? "true" : "false"}>
+		<a href="#main-content" class="skip-link">Skip to main content</a>
 		<header class="site-header">
 			<div class="header-container">
 				<a href="/" class="site-logo" transition:name="site-logo">
@@ -152,6 +153,7 @@ const ogImageURL = new URL(ogImage, Astro.site || SITE_URL).href;
 					class="menu-btn"
 					aria-label="Open Menu"
 					aria-expanded="false"
+					aria-controls="site-nav"
 				>
 					<svg id="menu-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="4" y1="12" x2="20" y2="12"></line>
@@ -207,7 +209,7 @@ const ogImageURL = new URL(ogImage, Astro.site || SITE_URL).href;
 				</nav>
 			</div>
 		</header>
-		<main class="container">
+		<main id="main-content" class="container">
 			<slot />
 		</main>
 		<footer class="site-footer">
@@ -262,6 +264,10 @@ const ogImageURL = new URL(ogImage, Astro.site || SITE_URL).href;
 				
 				document.documentElement.setAttribute("data-theme", theme);
 				document.documentElement.classList.toggle("dark", theme === "dark");
+				const themeColorMeta = document.getElementById("theme-color-meta");
+				if (themeColorMeta) {
+					themeColorMeta.setAttribute("content", theme === "dark" ? "#111218" : "#ffffff");
+				}
 
 				const lightAccent = document.body.getAttribute("data-light-accent") || "#006cac";
 				const darkAccent = document.body.getAttribute("data-dark-accent") || "#81c784";
@@ -321,6 +327,7 @@ const ogImageURL = new URL(ogImage, Astro.site || SITE_URL).href;
 
 				// Reset state
 				menuBtn.setAttribute("aria-expanded", "false");
+				menuBtn.setAttribute("aria-label", "Open Menu");
 				siteNav.classList.remove("open");
 				menuIcon.classList.remove("hidden");
 				closeIcon.classList.add("hidden");
@@ -328,6 +335,7 @@ const ogImageURL = new URL(ogImage, Astro.site || SITE_URL).href;
 				menuBtn.addEventListener("click", () => {
 					const isExpanded = menuBtn.getAttribute("aria-expanded") === "true";
 					menuBtn.setAttribute("aria-expanded", isExpanded ? "false" : "true");
+					menuBtn.setAttribute("aria-label", isExpanded ? "Open Menu" : "Close Menu");
 					
 					siteNav.classList.toggle("open");
 					menuIcon.classList.toggle("hidden");
@@ -366,6 +374,27 @@ const ogImageURL = new URL(ogImage, Astro.site || SITE_URL).href;
 			color: var(--accent-color);
 			text-decoration: underline dashed;
 			text-underline-offset: 4px;
+		}
+
+		.skip-link {
+			position: absolute;
+			top: -40px;
+			left: 0;
+			background: var(--accent-color);
+			color: var(--bg-color);
+			padding: 0.5rem 1rem;
+			text-decoration: none;
+			z-index: 10000;
+			font-family: var(--font-mono);
+			font-size: 0.875rem;
+			transition: top 0.2s ease;
+		}
+
+		.skip-link:focus {
+			top: 0;
+			outline: 2px solid var(--accent-color);
+			outline-offset: 2px;
+			text-decoration: none;
 		}
 	</style>
 	</body>

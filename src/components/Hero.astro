@@ -16,14 +16,13 @@ import { heroData } from '../config/portfolioData';
     <p class="hero-description">
       {heroData.description}
     </p>
-    <p class="hero-tagline">
+    <div class="hero-tagline">
       <Fragment set:html={heroData.tagline} />
-      <br />
       <div style="display:flex; flex-wrap:wrap; gap:1rem; margin-top:0.75rem;">
         <a href="/about" class="know-more-link">Know more about me &rarr;</a>
         <a href="/spotify" class="know-more-link">Spotify stats &rarr;</a>
       </div>
-    </p>
+    </div>
   </div>
 </section>
 
