@@ -873,36 +873,47 @@ const decorUrl = user.avatar_decoration_data
       .then((data) => {
         // Update Clan Tag
         const clan = data.user?.clan || data.user?.primary_guild || null;
-        const clanBadgeContainer = document.getElementById("clan-badge-container");
-        const clanTag = document.getElementById("clan-tag");
-        const clanBadgeIcon = document.getElementById("clan-badge-icon") as HTMLImageElement;
+        const clanJson = JSON.stringify(clan ? { tag: clan.tag, badge: clan.badge, identity_guild_id: clan.identity_guild_id, identity_enabled: clan.identity_enabled } : null);
+        if (clanJson !== lastClanJson) {
+          lastClanJson = clanJson;
+          const clanBadgeContainer = document.getElementById("clan-badge-container");
+          const clanTag = document.getElementById("clan-tag");
+          const clanBadgeIcon = document.getElementById("clan-badge-icon") as HTMLImageElement;
 
-        if (clan && clan.identity_enabled) {
-          if (clanBadgeContainer) {
-            clanBadgeContainer.style.display = "inline-flex";
-            clanBadgeContainer.title = `Clan: ${clan.tag}`;
+          if (clan && clan.identity_enabled) {
+            if (clanBadgeContainer) {
+              clanBadgeContainer.style.display = "inline-flex";
+              clanBadgeContainer.title = `Clan: ${clan.tag}`;
+            }
+            if (clanTag) clanTag.textContent = clan.tag || "";
+            if (clanBadgeIcon && clan.badge && clan.identity_guild_id) {
+              clanBadgeIcon.src = `https://cdn.discordapp.com/clan-badges/${clan.identity_guild_id}/${clan.badge}.png`;
+              clanBadgeIcon.style.display = "block";
+            } else if (clanBadgeIcon) {
+              clanBadgeIcon.style.display = "none";
+            }
+          } else {
+            if (clanBadgeContainer) clanBadgeContainer.style.display = "none";
           }
-          if (clanTag) clanTag.textContent = clan.tag || "";
-          if (clanBadgeIcon && clan.badge && clan.identity_guild_id) {
-            clanBadgeIcon.src = `https://cdn.discordapp.com/clan-badges/${clan.identity_guild_id}/${clan.badge}.png`;
-            clanBadgeIcon.style.display = "block";
-          } else if (clanBadgeIcon) {
-            clanBadgeIcon.style.display = "none";
-          }
-        } else {
-          if (clanBadgeContainer) clanBadgeContainer.style.display = "none";
         }
 
         // Update Badges Row
         const badgesContainer = document.getElementById("badges-container");
         if (badgesContainer && data.badges) {
-          badgesContainer.innerHTML = data.badges.map((badge: any) => {
-            const src = badge.icon ? `https://cdn.discordapp.com/badge-icons/${badge.icon}.png` : (badge.asset ? `https://cdn.discordapp.com/assets/collectibles/${badge.asset}.png` : "");
-            if (!src) return "";
-            const alt = badge.description || badge.id || '';
-            const title = badge.description || badge.id || '';
-            return `<img class="badge-icon" src="${src}" alt="${alt.replace(/"/g, '&quot;')}" title="${title.replace(/"/g, '&quot;')}" referrerpolicy="no-referrer" loading="lazy" />`;
-          }).join("");
+          const badgesJson = JSON.stringify(data.badges);
+          if (badgesJson !== lastBadgesJson) {
+            lastBadgesJson = badgesJson;
+            badgesContainer.innerHTML = data.badges.map((badge: any) => {
+              const src = badge.icon ? `https://cdn.discordapp.com/badge-icons/${badge.icon}.png` : (badge.asset ? `https://cdn.discordapp.com/assets/collectibles/${badge.asset}.png` : "");
+              if (!src) return "";
+              const alt = badge.description || badge.id || '';
+              const title = badge.description || badge.id || '';
+              return `<img class="badge-icon" src="${src}" alt="${alt.replace(/"/g, '&quot;')}" title="${title.replace(/"/g, '&quot;')}" referrerpolicy="no-referrer" loading="lazy" />`;
+            }).join("");
+          }
+        } else if (badgesContainer && !data.badges && lastBadgesJson !== "[]") {
+          lastBadgesJson = "[]";
+          badgesContainer.innerHTML = "";
         }
 
         // Update Avatar
@@ -948,20 +959,24 @@ const decorUrl = user.avatar_decoration_data
             color = `#${(data.user.accent_color >>> 0).toString(16).padStart(6, "0")}`;
           }
 
-          if (color) {
-            discordCard.style.borderTop = `6px solid ${color}`;
-            const isDark = document.documentElement.classList.contains("dark") || document.documentElement.getAttribute("data-theme") === "dark";
-            if (isDark) {
-              document.documentElement.style.setProperty("--accent-color", color);
+          const colorKey = color || "none";
+          if (colorKey !== lastBannerColor) {
+            lastBannerColor = colorKey;
+            if (color) {
+              discordCard.style.borderTop = `6px solid ${color}`;
+              const isDark = document.documentElement.classList.contains("dark") || document.documentElement.getAttribute("data-theme") === "dark";
+              if (isDark) {
+                document.documentElement.style.setProperty("--accent-color", color);
+              }
+              localStorage.setItem("discord-accent", color);
+            } else {
+              discordCard.style.borderTop = "";
+              const isDark = document.documentElement.classList.contains("dark") || document.documentElement.getAttribute("data-theme") === "dark";
+              if (isDark) {
+                document.documentElement.style.setProperty("--accent-color", "#81c784");
+              }
+              localStorage.setItem("discord-accent", "#81c784");
             }
-            localStorage.setItem("discord-accent", color);
-          } else {
-            discordCard.style.borderTop = "";
-            const isDark = document.documentElement.classList.contains("dark") || document.documentElement.getAttribute("data-theme") === "dark";
-            if (isDark) {
-              document.documentElement.style.setProperty("--accent-color", "#81c784");
-            }
-            localStorage.setItem("discord-accent", "#81c784");
           }
         }
       })
@@ -1155,6 +1170,9 @@ const decorUrl = user.avatar_decoration_data
 
   // Track last-known profile fingerprint to avoid redundant profile fetches
   let lastProfileFingerprint = "";
+  let lastBadgesJson = "";
+  let lastClanJson = "";
+  let lastBannerColor = "";
 
   function updateLiveStatus(data: any) {
     const status = data.discord_status;
@@ -1399,15 +1417,25 @@ const decorUrl = user.avatar_decoration_data
     (window as any).__lanyardConnected = true;
     connectLanyard();
   } else {
-    // Re-check status on navigation
+    // Re-check status on navigation only if needed
     fetch(`https://api.lanyard.rest/v1/users/${USER_ID}`)
       .then((res) => res.json())
       .then((json) => {
         if (json.success && json.data) {
-          updateLiveStatus(json.data);
+          // Only update if presence actually changed
+          const currentFp = [
+            json.data.discord_user?.avatar || "",
+            json.data.discord_status || "",
+            json.data.activities?.find((a:any)=>a.type===4)?.state || "",
+            json.data.spotify?.song || "",
+            String(!!json.data.listening_to_spotify)
+          ].join("|");
+          if (currentFp !== lastProfileFingerprint) {
+            updateLiveStatus(json.data);
+            fetchProfileDetails();
+          }
         }
       })
       .catch(() => {});
-    fetchProfileDetails();
   }
 </script>
