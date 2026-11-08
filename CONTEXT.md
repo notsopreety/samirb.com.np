@@ -66,3 +66,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-03] UI: globalize link hover underline
 - [2026-11-03] Fix: breadcrumb match about
 - [2026-11-08] Fix: disable prerender for spotify page
+- [2026-11-08] Fix: spotify static + client fetch
