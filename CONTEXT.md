@@ -76,3 +76,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-09] Fix: lanyard reconnect on nav
 - [2026-11-09] Add: oneko.js
 - [2026-11-09] Add: oneko from github
+- [2026-11-09] Add: local oneko.js from github
