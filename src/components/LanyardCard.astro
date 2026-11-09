@@ -1101,7 +1101,14 @@ const decorUrl = user.avatar_decoration_data
 
   function connectLanyard() {
     fetchProfileDetails();
+    try {
+      const oldWs = (window as any).__lanyardWS;
+      if (oldWs && oldWs.readyState <= 1) {
+        oldWs.close();
+      }
+    } catch {}
     const ws = new WebSocket("wss://api.lanyard.rest/socket");
+    (window as any).__lanyardWS = ws;
     let heartbeatInterval: any;
 
     initialLoadTimeout = setTimeout(() => {
@@ -1395,47 +1402,37 @@ const decorUrl = user.avatar_decoration_data
     }
   }
 
+  function ensureLanyardActive() {
+    const cardContainer = document.getElementById("lanyard-sidebar-container");
+    if (cardContainer) {
+      cardContainer.style.display = "flex";
+    }
+    initAvatarDecoration();
+    fetchProfileDetails();
+    
+    fetch(`https://api.lanyard.rest/v1/users/${USER_ID}`, { cache: "no-store" })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          updateLiveStatus(json.data);
+        }
+      })
+      .catch(() => {});
+    
+    const ws = (window as any).__lanyardWS;
+    if (!(window as any).__lanyardConnected || !ws || ws.readyState > 1) {
+      (window as any).__lanyardConnected = true;
+      connectLanyard();
+    }
+  }
+
   if (document.readyState === "complete") {
     setTimeout(initAvatarDecoration, 200);
   } else {
     window.addEventListener("load", () => setTimeout(initAvatarDecoration, 200));
   }
 
-  document.addEventListener("astro:after-swap", initAvatarDecoration);
+  document.addEventListener("astro:after-swap", ensureLanyardActive);
 
-  // Show the card container immediately client-side to prevent static blank states
-  const cardContainer = document.getElementById("lanyard-sidebar-container");
-  if (cardContainer) {
-    cardContainer.style.display = "flex";
-  }
-
-  // Fetch latest profile details (badges, banner, pronouns) immediately
-  fetchProfileDetails();
-
-  // Only connect if not already connected
-  if (!(window as any).__lanyardConnected) {
-    (window as any).__lanyardConnected = true;
-    connectLanyard();
-  } else {
-    // Re-check status on navigation only if needed
-    fetch(`https://api.lanyard.rest/v1/users/${USER_ID}`)
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.success && json.data) {
-          // Only update if presence actually changed
-          const currentFp = [
-            json.data.discord_user?.avatar || "",
-            json.data.discord_status || "",
-            json.data.activities?.find((a:any)=>a.type===4)?.state || "",
-            json.data.spotify?.song || "",
-            String(!!json.data.listening_to_spotify)
-          ].join("|");
-          if (currentFp !== lastProfileFingerprint) {
-            updateLiveStatus(json.data);
-            fetchProfileDetails();
-          }
-        }
-      })
-      .catch(() => {});
-  }
+  ensureLanyardActive();
 </script>
