@@ -74,3 +74,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-08] Fix: audit improvements
 - [2026-11-08] Fix: emoji as css bg
 - [2026-11-09] Fix: lanyard reconnect on nav
+- [2026-11-09] Add: oneko.js
