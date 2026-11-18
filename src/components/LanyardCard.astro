@@ -71,10 +71,10 @@ const decorUrl = user.avatar_decoration_data
     <!-- Profile Details -->
     <div class="profile-info-section">
       <h2 class="profile-display-name">
-        <span id="display-name">{displayNameVal}</span>
+        <a id="display-name" href={`https://discord.com/users/${USER_ID}`} target="_blank" rel="noopener noreferrer">{displayNameVal}</a>
       </h2>
       <div class="profile-sub-title">
-        <span id="profile-username">{usernameVal}</span>
+        <a id="profile-username" href={`https://discord.com/users/${USER_ID}`} target="_blank" rel="noopener noreferrer">{usernameVal}</a>
         <span class="dot-separator">•</span>
         {pronounsVal && <><span id="profile-pronouns">{pronounsVal}</span><span class="dot-separator">•</span></>}
 
