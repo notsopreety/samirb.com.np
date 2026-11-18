@@ -1,6 +1,10 @@
 // oneko.js: https://github.com/adryd325/oneko.js
 
 (function oneko() {
+  // Guard against re-execution on Astro view transitions
+  if (window.__onekoActive) return;
+  window.__onekoActive = true;
+
   const isReducedMotion =
     window.matchMedia(`(prefers-reduced-motion: reduce)`) === true ||
     window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true;
@@ -128,6 +132,17 @@
     nekoEl.style.backgroundImage = `url(${nekoFile})`;
     
     document.body.appendChild(nekoEl);
+
+    // Astro view transitions replace <body>; re-attach the cat each time
+    const reattachNeko = () => {
+      if (nekoEl.parentElement !== document.body) {
+        document.body.appendChild(nekoEl);
+      }
+      nekoEl.style.left = `${nekoPosX - 16}px`;
+      nekoEl.style.top = `${nekoPosY - 16}px`;
+    };
+    document.addEventListener("astro:after-swap", reattachNeko);
+    document.addEventListener("astro:page-load", reattachNeko);
 
     document.addEventListener("mousemove", function (event) {
       mousePosX = event.clientX;
