@@ -83,3 +83,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-18] Add: Discord name/username link to profile
 - [2026-11-18] Fix: only Discord username is a link
 - [2026-11-18] Fix: Discord username link normal color until hover
+- [2026-11-18] Fix: stable dashed hover underline (no flicker)
