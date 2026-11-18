@@ -959,23 +959,27 @@ const decorUrl = user.avatar_decoration_data
             color = `#${(data.user.accent_color >>> 0).toString(16).padStart(6, "0")}`;
           }
 
+          const isDark = document.documentElement.classList.contains("dark") || document.documentElement.getAttribute("data-theme") === "dark";
+          const sync = isDark
+            ? document.body.getAttribute("data-sync-dark") === "true"
+            : document.body.getAttribute("data-sync-light") === "true";
+          const fallback = (isDark
+            ? document.body.getAttribute("data-dark-accent")
+            : document.body.getAttribute("data-light-accent")) || "#006cac";
+
           const colorKey = color || "none";
           if (colorKey !== lastBannerColor) {
             lastBannerColor = colorKey;
+            discordCard.style.borderTop = color ? `6px solid ${color}` : "";
             if (color) {
-              discordCard.style.borderTop = `6px solid ${color}`;
-              const isDark = document.documentElement.classList.contains("dark") || document.documentElement.getAttribute("data-theme") === "dark";
-              if (isDark) {
+              localStorage.setItem("discord-accent", color);
+              if (sync) {
                 document.documentElement.style.setProperty("--accent-color", color);
               }
-              localStorage.setItem("discord-accent", color);
             } else {
-              discordCard.style.borderTop = "";
-              const isDark = document.documentElement.classList.contains("dark") || document.documentElement.getAttribute("data-theme") === "dark";
-              if (isDark) {
-                document.documentElement.style.setProperty("--accent-color", "#81c784");
-              }
-              localStorage.setItem("discord-accent", "#81c784");
+              // Cache only real Discord colors so a missing banner never overrides the theme
+              localStorage.removeItem("discord-accent");
+              document.documentElement.style.setProperty("--accent-color", fallback);
             }
           }
         }

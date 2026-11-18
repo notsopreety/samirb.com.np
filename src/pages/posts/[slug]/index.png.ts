@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import satori from "satori";
 import sharp from "sharp";
-import { discordId, SITE_DOMAIN } from "../../../config/portfolioData";
+import { discordId, SITE_DOMAIN, darkModeAccentColor } from "../../../config/portfolioData";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -16,7 +16,7 @@ export const GET: APIRoute = async ({ props }) => {
   const { post } = props as { post: any };
 
   // Fetch Discord profile color at build time
-  let discordColor = "#81c784"; // Default fallback soft green
+  let discordColor = darkModeAccentColor; // Theme fallback until Discord color loads
   try {
     const profileRes = await fetch(`https://dcdn.dstn.to/profile/${discordId}`);
     if (profileRes.ok) {
