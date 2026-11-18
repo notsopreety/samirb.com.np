@@ -4,37 +4,39 @@ export const prerender = false;
 import Layout from "../layouts/Layout.astro";
 import { SITE_DOMAIN } from "../config/portfolioData";
 
-let recent: any[] = [];
-let topTracks: any[] = [];
-let topArtists: any[] = [];
-let topGenres: any[] = [];
+const SPOTIFY_API = "https://api.samirbadaila.com.np/api/spotify";
+const CACHE_TTL = 60_000; // keep data fresh while avoiding repeated API calls
+const spotifyCache = new Map<string, { at: number; items: any[] }>();
 
-try {
-  const [rRes, tRes, aRes, gRes] = await Promise.all([
-    fetch("https://api.samirbadaila.com.np/api/spotify/recent", { cache: "no-store" }),
-    fetch("https://api.samirbadaila.com.np/api/spotify/top/tracks", { cache: "no-store" }),
-    fetch("https://api.samirbadaila.com.np/api/spotify/top/artists", { cache: "no-store" }),
-    fetch("https://api.samirbadaila.com.np/api/spotify/top/genres", { cache: "no-store" }),
-  ]);
-  if (rRes.ok) {
-    const j = await rRes.json();
-    recent = j.data?.streams || [];
+async function spotifyGet(path: string, key: string) {
+  const cached = spotifyCache.get(key);
+  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.items;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(`${SPOTIFY_API}/${path}`, {
+        cache: "no-store",
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      const items = json?.data?.[key];
+      if (!Array.isArray(items)) throw new Error(`Unexpected data shape for ${key}`);
+      spotifyCache.set(key, { at: Date.now(), items });
+      return items;
+    } catch (e) {
+      console.error(`Spotify ${path} fetch failed (attempt ${attempt + 1})`, e);
+    }
   }
-  if (tRes.ok) {
-    const j = await tRes.json();
-    topTracks = j.data?.tracks || [];
-  }
-  if (aRes.ok) {
-    const j = await aRes.json();
-    topArtists = j.data?.artists || [];
-  }
-  if (gRes.ok) {
-    const j = await gRes.json();
-    topGenres = j.data?.genres || [];
-  }
-} catch (e) {
-  // ignore
+  return cached?.items ?? [];
 }
+
+const [recent, topTracks, topArtists, topGenres] = await Promise.all([
+  spotifyGet("recent", "streams"),
+  spotifyGet("top/tracks", "tracks"),
+  spotifyGet("top/artists", "artists"),
+  spotifyGet("top/genres", "genres"),
+]);
 
 function timeAgo(ts: string) {
   const diff = Date.now() - new Date(ts).getTime();
