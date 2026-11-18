@@ -80,3 +80,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-18] Fix: oneko persist across transitions
 - [2026-11-18] Fix: dark accent syncs with Discord, preloader uses light accent
 - [2026-11-18] Fix: Spotify API retry/timeout/cache fallback
+- [2026-11-18] Add: Discord name/username link to profile
