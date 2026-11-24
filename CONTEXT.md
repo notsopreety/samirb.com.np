@@ -87,3 +87,4 @@ Building minimal dev portfolio. Keep changes small per ponytail rules. Coordinat
 - [2026-11-18] Fix: smooth Discord username hover transition
 - [2026-11-18] Docs: rewrite README
 - [2026-11-18] Docs: expand README setup/guide/info
+- [2026-11-24] UI: add fixed left/right bottom vertical ribbons (email + social icons) in Layout.astro
